@@ -1,0 +1,693 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Playlist Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #312e81 100%);
+            color: #e5e7eb;
+            line-height: 1.6;
+        }
+
+        nav {
+            background-color: rgba(30, 41, 59, 0.95);
+            padding: 15px 0;
+            margin-bottom: 2rem;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav li {
+            margin: 5px 15px;
+        }
+
+        nav a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        nav a:hover {
+            color: #a78bfa;
+            background-color: rgba(167, 139, 250, 0.1);
+        }
+
+        #playlist-hero {
+            text-align: center;
+            padding: 5rem 2rem 4rem;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 24px;
+            margin: 3rem auto;
+            max-width: 1000px;
+            box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        #playlist-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        #playlist-hero p {
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        section {
+            max-width: 1000px;
+            margin: 4rem auto;
+            padding: 0 1.5rem;
+        }
+
+        section h2 {
+            font-size: 2.2rem;
+            margin-bottom: 2rem;
+            margin-top: 1rem;
+            color: #a78bfa;
+            font-weight: 700;
+        }
+
+        form {
+            background: rgba(30, 41, 59, 0.95);
+            padding: 2rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        form:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #cbd5e1;
+            font-weight: 600;
+            font-size: 1.05rem;
+        }
+
+        select {
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1.5rem;
+            background: rgba(15, 23, 42, 0.95);
+            color: #e5e7eb;
+            border: 2px solid #334155;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+        }
+
+        select:hover {
+            border-color: #6366f1;
+        }
+
+        button {
+            display: inline-block;
+            margin: 1rem 0.5rem;
+            padding: 1rem 2.2rem;
+            font-size: 1.1rem;
+            border: none;
+            border-radius: 999px;
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            color: #ffffff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        button:hover {
+            background: linear-gradient(135deg, #4f46e5, #4338ca);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+        }
+
+        form button {
+            display: block;
+            width: 100%;
+            margin: 2rem 0 0;
+        }
+
+        .button-container {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .home-button {
+            margin: 3rem auto 2rem;
+            display: block;
+            width: fit-content;
+        }
+
+        #result-box {
+            background: rgba(30, 41, 59, 0.95);
+            padding: 2rem;
+            border-radius: 16px;
+            min-height: 100px;
+            margin-top: 2rem;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        #result-box:hover {
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        #result-box.empty {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            font-style: italic;
+        }
+
+        .playlist-header {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #c4b5fd;
+            font-weight: 700;
+        }
+
+        .playlist-description {
+            color: #cbd5e1;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 2px solid #334155;
+            line-height: 1.7;
+        }
+
+        .song-list {
+            margin-top: 1.5rem;
+        }
+
+        .song-item {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            border-radius: 8px;
+            border-left: 4px solid #6366f1;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .song-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        .song-title {
+            font-weight: 600;
+            color: #f8fafc;
+            font-size: 1.1rem;
+        }
+
+        .song-artist {
+            color: #94a3b8;
+            font-size: 0.9rem;
+            margin-top: 0.3rem;
+        }
+
+        .science-box {
+            background: rgba(49, 46, 129, 0.95);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            border-left: 4px solid #10b981;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .science-box:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .science-box h3 {
+            color: #10b981;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .science-box p {
+            color: #cbd5e1;
+            line-height: 1.8;
+        }
+
+        .part2 {
+            padding: 20px;
+            margin-top: 50px;
+            background: rgba(30, 41, 59, 0.95);
+            border-radius: 16px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .part2:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(99, 102, 241, 0.3);
+        }
+
+        .part2 h2 {
+            color: #a78bfa;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .button-container a {
+            text-decoration: none;
+        }
+
+        @media (max-width: 600px) {
+            #playlist-hero h1 {
+                font-size: 2rem;
+            }
+
+            section {
+                margin: 3rem auto;
+            }
+
+            button {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .button-container {
+                display: flex;
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .button-container button {
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            nav {
+                padding: 10px 0;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+            nav li {
+                margin: 0.3rem 0;
+                width: 90%;
+                text-align: center;
+            }
+
+            nav a {
+                display: block;
+                width: 100%;
+                padding: 0.8rem 1rem;
+                min-height: 44px;
+            }
+
+            #playlist-hero {
+                padding: 3rem 1.5rem 2.5rem;
+                margin: 1.5rem auto;
+            }
+
+            #playlist-hero h1 {
+                font-size: 2rem;
+            }
+
+            #playlist-hero p {
+                font-size: 1rem;
+            }
+
+            section {
+                margin: 2rem auto;
+                padding: 0 1rem;
+            }
+
+            section h2 {
+                font-size: 1.6rem;
+                margin-bottom: 1.5rem;
+            }
+
+            form {
+                padding: 1.5rem;
+            }
+
+            label {
+                font-size: 0.95rem;
+            }
+
+            select, input {
+                padding: 0.7rem;
+                font-size: 0.95rem;
+            }
+
+            button[type="submit"] {
+                padding: 0.9rem;
+                font-size: 1rem;
+            }
+
+            .mood-card-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .mood-card {
+                padding: 1.5rem;
+            }
+
+            .mood-card h3 {
+                font-size: 1.4rem;
+            }
+
+            #playlist-results {
+                padding: 1.5rem;
+            }
+
+            .song-item {
+                padding: 1rem;
+                font-size: 0.95rem;
+            }
+
+            .playlist-controls {
+                flex-direction: column;
+                gap: 0.8rem;
+            }
+
+            .playlist-controls button {
+                width: 100%;
+                padding: 0.8rem;
+            }
+        }
+
+        /* Small Mobile */
+        @media (max-width: 480px) {
+            #playlist-hero h1 {
+                font-size: 1.6rem;
+            }
+
+            section h2 {
+                font-size: 1.4rem;
+            }
+
+            .mood-card h3 {
+                font-size: 1.2rem;
+            }
+        }
+
+        /* Touch optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            .mood-card:hover {
+                transform: none;
+            }
+
+            button:active {
+                transform: translateY(-1px);
+            }
+        }
+
+    </style>
+</head>
+<body>
+
+<section id="playlist-hero">
+    <h1>Customized Playlists</h1>
+    <p>
+        Answer a few questions and receive a playlist designed
+        using real psychological research.
+    </p>
+</section>
+
+<nav>
+    <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
+        <li><a href="moodandfocus.html">Mood and Focus</a></li>
+        <li><a href="musicandemotionanalysis.html">Music and Emotion Analysis</a></li>
+        <li><a href="playlists.html">Playlists</a></li>
+        <li><a href="glossary.html">Glossary</a></li>
+        <li><a href="index.html#about">About the Project</a></li>
+        <li><a href="index.html#feedback">Feedback</a></li>
+    </ul>
+</nav>
+
+<section id="playlist-quiz">
+    <h2>Customize Your Playlist</h2>
+
+    <form id="playlistForm">
+        <label>What is your goal?</label>
+        <select id="goal">
+            <option value="focus">Focus</option>
+            <option value="relax">Relax</option>
+            <option value="happy">Feel Happy</option>
+            <option value="energy">Get Energized</option>
+        </select>
+
+        <label>What kind of task are you doing?</label>
+        <select id="task">
+            <option value="studying">Studying</option>
+            <option value="working">Working</option>
+            <option value="exercising">Exercising</option>
+            <option value="relaxing">Relaxing</option>
+        </select>
+
+        <label>Do you prefer lyrics?</label>
+        <select id="lyrics">
+            <option value="no">No lyrics (Instrumental only)</option>
+            <option value="yes">Lyrics are fine</option>
+        </select>
+
+        <button type="button" onclick="generatePlaylist()">
+            Generate My Playlist
+        </button>
+    </form>
+</section>
+
+<section id="playlistResults">
+    <h2>Your Recommended Playlist</h2>
+    <div id="result-box" class="empty">
+        Click "Generate My Playlist" to see your personalized recommendations
+    </div>
+    
+    <div class="part2">
+        <h2>Create Your Own Playlists</h2>
+        <p style="text-align: center; color: #cbd5e1; margin-bottom: 1.5rem;">
+            If you wish to create your own playlists on Spotify, Apple Music, or YouTube Music based on the recommendations above, click below:
+        </p>
+        <div class="button-container">
+            <a href="https://www.spotify.com" target="_blank"><button>Spotify</button></a>
+            <a href="https://www.apple.com/apple-music/" target="_blank"><button>Apple Music</button></a>
+            <a href="https://www.youtube.com/musicpremium" target="_blank"><button>YouTube Music</button></a>
+        </div>
+    </div>
+</section>
+
+<script>
+// Song database organized by mood and type
+const songDatabase = {
+    focus: {
+        instrumental: [
+            { title: "Lofi Hip Hop Radio", artist: "ChilledCow", genre: "Lo-fi" },
+            { title: "Moonlight Sonata", artist: "Beethoven", genre: "Classical" },
+            { title: "Clair de Lune", artist: "Debussy", genre: "Classical" },
+            { title: "Gymnopédie No. 1", artist: "Erik Satie", genre: "Classical" },
+            { title: "Coffee Shop Ambience", artist: "Lofi Fruits Music", genre: "Lo-fi" },
+            { title: "Study Lofi", artist: "Jinsang", genre: "Lo-fi" },
+            { title: "Rain & Piano", artist: "Ambient Worlds", genre: "Ambient" },
+            { title: "Deep Focus", artist: "Spotify Playlist", genre: "Ambient" }
+        ],
+        lyrics: [
+            { title: "Weightless", artist: "Marconi Union", genre: "Ambient" },
+            { title: "Electric Relaxation", artist: "A Tribe Called Quest", genre: "Hip-Hop" },
+            { title: "Lost in Yesterday", artist: "Tame Impala", genre: "Indie" },
+            { title: "Float On", artist: "Modest Mouse", genre: "Indie" }
+        ]
+    },
+    relax: {
+        instrumental: [
+            { title: "Weightless", artist: "Marconi Union", genre: "Ambient" },
+            { title: "Clair de Lune", artist: "Debussy", genre: "Classical" },
+            { title: "Spiegel im Spiegel", artist: "Arvo Pärt", genre: "Classical" },
+            { title: "Sunset Lover", artist: "Petit Biscuit (Instrumental)", genre: "Electronic" },
+            { title: "River Flows in You", artist: "Yiruma", genre: "Piano" },
+            { title: "Porcelain", artist: "Moby", genre: "Ambient" },
+            { title: "Aqueous Transmission", artist: "Incubus", genre: "Alternative" }
+        ],
+        lyrics: [
+            { title: "Banana Pancakes", artist: "Jack Johnson", genre: "Folk" },
+            { title: "Come Away With Me", artist: "Norah Jones", genre: "Jazz" },
+            { title: "The Night We Met", artist: "Lord Huron", genre: "Indie Folk" },
+            { title: "Holocene", artist: "Bon Iver", genre: "Indie Folk" },
+            { title: "To Build a Home", artist: "The Cinematic Orchestra", genre: "Ambient" }
+        ]
+    },
+    happy: {
+        instrumental: [
+            { title: "Emotion", artist: "Mariah Carey", genre: "R and B" },
+            { title: "Take Five", artist: "Dave Brubeck", genre: "Jazz" },
+            { title: "Sing Sing Sing", artist: "Benny Goodman", genre: "Jazz" },
+            { title: "Feels Like Summer", artist: "Childish Gambino (Instrumental)", genre: "R&B" },
+            { title: "Jessica", artist: "The Allman Brothers Band", genre: "Rock" }
+        ],
+        lyrics: [
+            { title: "Good Life", artist: "OneRepublic", genre: "Pop" },
+            { title: "Walking on Sunshine", artist: "Katrina and The Waves", genre: "Pop" },
+            { title: "Happy", artist: "Pharrell Williams", genre: "Pop" },
+            { title: "Mr. Blue Sky", artist: "Electric Light Orchestra", genre: "Rock" },
+            { title: "September", artist: "Earth, Wind & Fire", genre: "Funk" },
+            { title: "I Got You (I Feel Good)", artist: "James Brown", genre: "Funk" },
+            { title: "Don't Stop Me Now", artist: "Queen", genre: "Rock" },
+            { title: "Uptown Funk", artist: "Bruno Mars", genre: "Funk/Pop" }
+        ]
+    },
+    energy: {
+        instrumental: [
+            { title: "Sandstorm", artist: "Darude", genre: "EDM" },
+            { title: "Animals (Instrumental)", artist: "Martin Garrix", genre: "EDM" },
+            { title: "Orion", artist: "Metallica", genre: "Rock" },
+            { title: "Moby Dick", artist: "Led Zeppelin", genre: "Rock" }
+        ],
+        lyrics: [
+            { title: "Till I Collapse", artist: "Eminem", genre: "Hip-Hop" },
+            { title: "Eye of the Tiger", artist: "Survivor", genre: "Rock" },
+            { title: "Thunderstruck", artist: "AC/DC", genre: "Rock" },
+            { title: "Lose Yourself", artist: "Eminem", genre: "Hip-Hop" },
+            { title: "Levels", artist: "Avicii", genre: "EDM" },
+            { title: "Titanium", artist: "David Guetta ft. Sia", genre: "EDM" },
+            { title: "HUMBLE.", artist: "Kendrick Lamar", genre: "Hip-Hop" },
+            { title: "Can't Hold Us", artist: "Macklemore & Ryan Lewis", genre: "Hip-Hop" }
+        ]
+    }
+};
+
+function generatePlaylist() {
+    const goal = document.getElementById("goal").value;
+    const task = document.getElementById("task").value;
+    const lyrics = document.getElementById("lyrics").value;
+    
+    const resultBox = document.getElementById("result-box");
+    resultBox.classList.remove("empty");
+    
+    // Determine which songs to use
+    let songs;
+    if (lyrics === "no") {
+        songs = songDatabase[goal].instrumental;
+    } else {
+        // Mix instrumental and lyrical songs for variety
+        songs = [...songDatabase[goal].instrumental.slice(0, 3), ...songDatabase[goal].lyrics.slice(0, 5)];
+    }
+    
+    // Shuffle and pick songs
+    const shuffledSongs = songs.sort(() => 0.5 - Math.random()).slice(0, 6);
+    
+    // Get mood emoji and description
+    const moodData = {
+        focus: {
+            emoji: "🎧",
+            title: "Focus Playlist",
+            description: lyrics === "no" 
+                ? "This playlist avoids lyrics to reduce language interference and promote a flow state. Instrumental music blocks distractions and creates a constant auditory environment."
+                : "This playlist supports concentration with carefully selected tracks. Mix of instrumental and light lyrics to maintain focus."
+        },
+        relax: {
+            emoji: "🌊",
+            title: "Relaxation Playlist",
+            description: "These tracks lower heart rate and cortisol levels. Classical and acoustic elements promote calmness and reduce stress and anxiety."
+        },
+        happy: {
+            emoji: "☀️",
+            title: "Mood-Boost Playlist",
+            description: "Upbeat tempos stimulate dopamine release. Jazz and funk trigger alpha waves associated with a calm, happy mind."
+        },
+        energy: {
+            emoji: "⚡",
+            title: "Energy Playlist",
+            description: "Fast tempo music increases arousal and motivation. High-energy tracks boost physical performance and mental drive."
+        }
+    };
+    
+    const mood = moodData[goal];
+    
+    // Build the HTML
+    let html = `
+        <div class="playlist-header">${mood.emoji} ${mood.title}</div>
+        <div class="playlist-description">${mood.description}</div>
+        <div class="song-list">
+    `;
+    
+    shuffledSongs.forEach((song, index) => {
+        html += `
+            <div class="song-item">
+                <div class="song-title">${index + 1}. ${song.title}</div>
+                <div class="song-artist">${song.artist} · ${song.genre}</div>
+            </div>
+        `;
+    });
+    
+    html += `</div>`;
+    
+    // Add science justification based on task
+    const scienceText = {
+        studying: "Instrumental music is optimal for studying as it avoids verbal processing interference. This allows your brain to focus on reading and comprehension tasks.",
+        working: "Background music creates an optimal environment for productivity by blocking distractions and promoting consistent brainwaves that improve performance.",
+        exercising: "Music with strong rhythms synchronizes with physical movement, increasing motivation and endurance. Higher volume is acceptable as physical activity helps distract from intensity.",
+        relaxing: "Low volume calming music promotes peace of mind by triggering alpha waves, lowering cortisol levels, and releasing dopamine for stress relief."
+    };
+    
+    html += `
+        <div class="science-box">
+            <h3>🧠 Why This Works for ${task.charAt(0).toUpperCase() + task.slice(1)}</h3>
+            <p>${scienceText[task]}</p>
+        </div>
+    `;
+    
+    resultBox.innerHTML = html;
+    
+    // Scroll to results
+    resultBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+</script>
+
+<button class="home-button" onclick="location.href='index.html'">Go Home</button>
+
+</body>
+</html>

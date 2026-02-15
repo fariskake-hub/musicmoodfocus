@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Music Glossary</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        header {
+            background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+            color: white;
+            padding: 2rem 0rem;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        nav {
+            background-color: rgba(255, 255, 255, 0.15);
+            padding: 1rem 0;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav li {
+            margin: 0.5rem 1rem;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        nav a:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .intro-section {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        .intro-section h2 {
+            color: #667eea;
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .intro-section p {
+            color: #4a5568;
+            font-size: 1.05rem;
+            line-height: 1.8;
+        }
+
+        .glossary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .term-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s ease;
+            border-top: 5px solid;
+        }
+
+        .term-card:nth-child(1) { border-top-color: #f59e0b; }
+        .term-card:nth-child(2) { border-top-color: #10b981; }
+        .term-card:nth-child(3) { border-top-color: #3b82f6; }
+        .term-card:nth-child(4) { border-top-color: #8b5cf6; }
+        .term-card:nth-child(5) { border-top-color: #ef4444; }
+        .term-card:nth-child(6) { border-top-color: #ec4899; }
+        .term-card:nth-child(7) { border-top-color: #14b8a6; }
+        .term-card:nth-child(8) { border-top-color: #f97316; }
+        .term-card:nth-child(9) { border-top-color: #06b6d4; }
+
+        .term-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .term-card:target {
+            animation: highlight 2s ease;
+        }
+
+        @keyframes highlight {
+            0% {
+                background-color: #fff;
+                transform: scale(1);
+            }
+            50% {
+                background-color: rgba(102, 126, 234, 0.15);
+                transform: scale(1.02);
+            }
+            100% {
+                background-color: #fff;
+                transform: scale(1);
+            }
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        .term-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .term-icon {
+            font-size: 2.5rem;
+            margin-right: 1rem;
+        }
+
+        .term-card h3 {
+            color: #2d3748;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .term-label {
+            background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #667eea;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 1rem;
+            display: inline-block;
+        }
+
+        .term-definition {
+            color: #4a5568;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #2d3748, #1a202c);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        footer p {
+            color: white;
+            font-size: 1rem;
+        }
+
+        /* Mobile Styles */
+        @media (max-width: 768px) {
+            header {
+                padding: 1.5rem 1rem;
+            }
+
+            header h1 {
+                font-size: 1.8rem;
+                line-height: 1.3;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            nav {
+                padding: 0.8rem 0;
+            }
+
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.3rem;
+            }
+
+            nav li {
+                margin: 0.3rem 0;
+                width: 90%;
+                text-align: center;
+            }
+
+            nav a {
+                display: block;
+                width: 100%;
+                padding: 0.8rem 1rem;
+                min-height: 44px;
+            }
+
+            main {
+                margin: 1rem auto;
+                padding: 0 0.8rem;
+            }
+
+            .intro-section {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .intro-section h2 {
+                font-size: 1.6rem;
+            }
+
+            .intro-section p {
+                font-size: 1rem;
+            }
+
+            .glossary-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+
+            .term-card {
+                padding: 1.5rem;
+            }
+
+            .term-icon {
+                font-size: 2rem;
+            }
+
+            .term-card h3 {
+                font-size: 1.5rem;
+            }
+
+            .term-definition {
+                font-size: 1rem;
+                padding: 1.2rem;
+            }
+
+            footer {
+                padding: 1.5rem 1rem;
+            }
+
+            footer p {
+                font-size: 0.9rem;
+            }
+        }
+
+        /* Small Mobile Styles */
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .intro-section {
+                padding: 1.2rem;
+            }
+
+            .intro-section h2 {
+                font-size: 1.4rem;
+            }
+
+            .term-card {
+                padding: 1.2rem;
+            }
+
+            .term-card h3 {
+                font-size: 1.3rem;
+            }
+
+            .term-icon {
+                font-size: 1.8rem;
+                margin-right: 0.8rem;
+            }
+
+            .term-definition {
+                font-size: 0.95rem;
+                padding: 1rem;
+            }
+        }
+
+        /* Touch device optimizations */
+        @media (hover: none) and (pointer: coarse) {
+            nav a:active {
+                background-color: rgba(255, 255, 255, 0.3);
+            }
+
+            .term-card:hover {
+                transform: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Header and Navigation -->
+    <header>
+        <h1>🎼 Music Glossary</h1>
+        <p>Essential musical terms to help you understand how music affects mood and focus</p>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
+                <li><a href="moodandfocus.html">Mood and Focus</a></li>
+                <li><a href="playlists.html">Playlists</a></li>
+                <li><a href="musicandemotionanalysis.html">Song Analysis</a></li>
+                <li><a href="glossary.html">Glossary</a></li>
+                <li><a href="index.html#feedback">Feedback</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+
+        <!-- Introduction -->
+        <div class="intro-section">
+            <h2>Understanding Musical Terms</h2>
+            <p>
+                This glossary defines key musical concepts referenced throughout the website. Understanding these terms will help you better appreciate how different musical elements combine to create specific emotional and cognitive responses.
+            </p>
+        </div>
+
+        <!-- Glossary Grid -->
+        <div class="glossary-grid">
+
+            <!-- Major Key -->
+            <div class="term-card" id="major-key">
+                <div class="term-header">
+                    <span class="term-icon">🎹</span>
+                    <h3>Major Key</h3>
+                </div>
+                <span class="term-label">Musical Theory</span>
+                <div class="term-definition">
+                    A major key is a musical key based on a major scale, which generally sounds bright, stable, and positive to listeners.
+                </div>
+            </div>
+
+            <!-- Tempo -->
+            <div class="term-card" id="tempo">
+                <div class="term-header">
+                    <span class="term-icon">⏱️</span>
+                    <h3>Tempo</h3>
+                </div>
+                <span class="term-label">Timing</span>
+                <div class="term-definition">
+                    The speed of a song, usually measured in beats per minute (BPM).
+                </div>
+            </div>
+
+            <!-- Dynamics -->
+            <div class="term-card" id="dynamics">
+                <div class="term-header">
+                    <span class="term-icon">📊</span>
+                    <h3>Dynamics</h3>
+                </div>
+                <span class="term-label">Volume</span>
+                <div class="term-definition">
+                    The loudness or softness of music and how it changes over time.
+                </div>
+            </div>
+
+            <!-- Instrumentation -->
+            <div class="term-card" id="instrumentation">
+                <div class="term-header">
+                    <span class="term-icon">🎸</span>
+                    <h3>Instrumentation</h3>
+                </div>
+                <span class="term-label">Sound Source</span>
+                <div class="term-definition">
+                    The instruments used in a piece of music.
+                </div>
+            </div>
+
+            <!-- Harmony -->
+            <div class="term-card" id="harmony">
+                <div class="term-header">
+                    <span class="term-icon">🎵</span>
+                    <h3>Harmony</h3>
+                </div>
+                <span class="term-label">Musical Structure</span>
+                <div class="term-definition">
+                    How multiple notes or chords are played together.
+                </div>
+            </div>
+
+            <!-- Mode -->
+            <div class="term-card" id="mode">
+                <div class="term-header">
+                    <span class="term-icon">🎼</span>
+                    <h3>Mode (Major / Minor)</h3>
+                </div>
+                <span class="term-label">Scale Type</span>
+                <div class="term-definition">
+                    The scale type used in a song.
+                </div>
+            </div>
+
+            <!-- Rhythm -->
+            <div class="term-card" id="rhythm">
+                <div class="term-header">
+                    <span class="term-icon">🥁</span>
+                    <h3>Rhythm</h3>
+                </div>
+                <span class="term-label">Beat Pattern</span>
+                <div class="term-definition">
+                    The pattern of beats in music.
+                </div>
+            </div>
+
+            <!-- Texture -->
+            <div class="term-card" id="texture">
+                <div class="term-header">
+                    <span class="term-icon">🌊</span>
+                    <h3>Texture</h3>
+                </div>
+                <span class="term-label">Density</span>
+                <div class="term-definition">
+                    How thick or thin the sound is (few instruments vs many).
+                </div>
+            </div>
+
+            <!-- Timbre -->
+            <div class="term-card" id="timbre">
+                <div class="term-header">
+                    <span class="term-icon">🎨</span>
+                    <h3>Timbre</h3>
+                </div>
+                <span class="term-label">Tone Color</span>
+                <div class="term-definition">
+                    The tone color of a sound — why a piano and guitar sound different even on the same note.
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>
+            MYP Personal Project 2025–2026 | Created by Faris Alakeel
+        </p>
+    </footer>
+
+</body>
+</html>

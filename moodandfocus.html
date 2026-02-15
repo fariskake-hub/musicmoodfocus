@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood and Focus</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+            color: #e2e8f0;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+        }
+
+        header {
+            background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+            padding: 30px 0 0px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        header h1 {
+            color: white;
+            margin: 25px 0;
+            font-size: 2.5em;
+            padding: 0 20px;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        nav {
+            background-color: rgba(30, 41, 59, 0.95);
+            padding: 15px 0;
+        }
+
+        nav ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        nav li {
+            margin: 5px 15px;
+        }
+
+        nav a {
+            color: #cbd5e1;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        nav a:hover {
+            color: #a78bfa;
+            background-color: rgba(167, 139, 250, 0.1);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .section {
+            transition: all 0.3s ease;
+            background: rgba(30, 41, 59, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3b82f6;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(59, 130, 246, 0.3);
+        }
+
+        h2 {
+            color: #93c5fd;
+            margin-bottom: 20px;
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        h3 {
+            color: #bfdbfe;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .comparison-card {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 25px;
+            border-radius: 15px;
+            border-top: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .comparison-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+
+        .comparison-card h4 {
+            color: #60a5fa;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .genre-effects {
+            background: rgba(15, 23, 42, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 15px 0;
+            border-left: 3px solid #8b5cf6;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .genre-effects:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .key-point {
+            background: rgba(30, 58, 95, 0.95);
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin: 15px 0;
+            border-left: 4px solid #60a5fa;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .key-point:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 20px rgba(96, 165, 250, 0.3);
+        }
+
+        ul {
+            margin-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            line-height: 1.7;
+        }
+
+        footer {
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            padding: 20px;
+            text-align: center;
+            color: #94a3b8;
+            margin-top: 60px;
+        }
+
+        .back-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+        }
+
+        .back-button:hover {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Music, Mood, and Focus</h1>
+    <nav>
+        <ul>
+            <li><a href="index.html">Home</a></li>
+            <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
+            <li><a href="moodandfocus.html">Mood and Focus</a></li>
+            <li><a href="musicandemotionanalysis.html">Music and Emotion Analysis</a></li>
+            <li><a href="playlists.html">Playlists</a></li>
+            <li><a href="glossary.html">Glossary</a></li>
+            <li><a href="index.html#about">About the Project</a></li>
+            <li><a href="index.html#feedback">Feedback</a></li>
+        </ul>
+    </nav>
+</header>
+
+<div class="container">
+    <section class="section">
+        <h2>How Different Genres Affect Your Mood and Focus</h2>
+        <p>
+            Music isn't just entertainment—it's a powerful tool that shapes how you feel and think. Different genres trigger specific brain responses, affecting everything from your stress levels to your ability to concentrate. Let's explore how each genre influences your mental state.
+        </p>
+    </section>
+
+    <section class="section">
+        <h2>Genre Breakdown: Mood and Focus Effects</h2>
+
+        <div class="genre-effects">
+            <h3>🎻 Classical Music</h3>
+            <p><strong>Mood Effect:</strong> Promotes calmness and reduces stress through pleasant, refined melodies.</p>
+            <p><strong>Focus Effect:</strong> Excellent for deep concentration. The absence of lyrics means your verbal processing area stays free for reading and writing tasks.</p>
+            <p><strong>Best For:</strong> Studying, reading, writing, and relaxation</p>
+        </div>
+
+        <div class="genre-effects">
+            <h3>📻 Lo-fi Music</h3>
+            <p><strong>Mood Effect:</strong> Creates a neutral, calm emotional state that reduces stress.</p>
+            <p><strong>Focus Effect:</strong> Predictable rhythms synchronize with your brain tempo, creating a "flow state" perfect for sustained concentration.</p>
+            <p><strong>Best For:</strong> Studying, working, creative tasks</p>
+        </div>
+
+        <div class="genre-effects">
+            <h3>🎺 Jazz & Funk</h3>
+            <p><strong>Mood Effect:</strong> Fun and playful, triggers alpha waves associated with a calm mind. Helps process feelings and releases dopamine.</p>
+            <p><strong>Focus Effect:</strong> Good for creative thinking but can be distracting for tasks requiring intense concentration.</p>
+            <p><strong>Best For:</strong> Social settings, relaxation, creative work</p>
+        </div>
+
+        <div class="genre-effects">
+            <h3>🌿 Indie & Folk</h3>
+            <p><strong>Mood Effect:</strong> Can be cheerful or emotional, helping listeners connect with their feelings. The acoustic nature is calming.</p>
+            <p><strong>Focus Effect:</strong> Consistent rhythms promote concentration without sudden shifts that could break focus.</p>
+            <p><strong>Best For:</strong> Reflective work, journaling, moderate focus tasks</p>
+        </div>
+
+        <div class="genre-effects">
+            <h3>🎤 Pop, EDM, Hip-Hop</h3>
+            <p><strong>Mood Effect:</strong> Very energetic and powerful—great for boosting mood and motivation.</p>
+            <p><strong>Focus Effect:</strong> Lyrics are highly distracting during complex verbal tasks like reading or studying. Better for repetitive tasks.</p>
+            <p><strong>Best For:</strong> Exercise, parties, repetitive work, mood boosting</p>
+        </div>
+
+        <div class="genre-effects">
+            <h3>🎸 Rock & Trap</h3>
+            <p><strong>Mood Effect:</strong> High energy that sparks motivation and intensity. Strong guitar riffs release serotonin and dopamine, reducing anxiety.</p>
+            <p><strong>Focus Effect:</strong> Great for physical activities but too intense for mental focus tasks.</p>
+            <p><strong>Best For:</strong> Working out, intense physical activities, when you need an energy boost</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Music with Lyrics vs. Instrumental vs. Silence</h2>
+        
+        <div class="comparison-grid">
+            <div class="comparison-card">
+                <h4>🎵 Music with Lyrics</h4>
+                <ul>
+                    <li>Bad for tasks requiring high concentration and language processing</li>
+                    <li>Reduces performance in writing, reading, and memory tasks</li>
+                    <li>Helps process feelings and enhance subjective experiences</li>
+                    <li>Great for exercise—distracts from physical discomfort</li>
+                </ul>
+            </div>
+
+            <div class="comparison-card">
+                <h4>🔇 Silence</h4>
+                <ul>
+                    <li>Can feel boring but reduces cortisol</li>
+                    <li>Allows the brain to process information efficiently</li>
+                    <li>Best for deep work and high-thinking activities</li>
+                    <li>Ideal for reading or writing notes</li>
+                </ul>
+            </div>
+
+            <div class="comparison-card">
+                <h4>🎹 Instrumental Music</h4>
+                <ul>
+                    <li>Increases enjoyment while reducing stress</li>
+                    <li>Promotes brainwaves that improve performance</li>
+                    <li>Blocks distractions without adding cognitive load</li>
+                    <li>Creates optimal environment for focus</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Context Matters: Matching Music to Your Activity</h2>
+
+        <div class="key-point">
+            <h3>📚 Studying/Working</h3>
+            <p><strong>Volume:</strong> Low to moderate (below 70 dB) to avoid distracting your information-processing brain areas</p>
+            <p><strong>Type:</strong> Instrumental music works better than music with lyrics—lyrics interrupt activities that need heavy thinking</p>
+            <p><strong>Best Genres:</strong> Lo-fi, Classical, Ambient</p>
+        </div>
+
+        <div class="key-point">
+            <h3>😌 Relaxing</h3>
+            <p><strong>Volume:</strong> Low volume to avoid distractions and promote peace of mind</p>
+            <p><strong>Type:</strong> Calming, slow music that triggers specific dopamine release</p>
+            <p><strong>Best Genres:</strong> Classical, Jazz, Indie/Folk</p>
+        </div>
+
+        <div class="key-point">
+            <h3>💪 Exercising</h3>
+            <p><strong>Volume:</strong> Moderate to high volume increases motivation</p>
+            <p><strong>Type:</strong> Songs with lyrics help distract from hard activities and increase productivity</p>
+            <p><strong>Best Genres:</strong> Rock, Hip-Hop, EDM, Pop</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Individual Differences in Music Preference</h2>
+        <p>
+            Not everyone responds to music the same way! Your music preference is shaped by:
+        </p>
+        <ul>
+            <li><strong>Personality:</strong> Extroverts often prefer energetic music while introverts may prefer calmer genres</li>
+            <li><strong>Experience:</strong> Familiarity with music makes it more effective for focus and mood regulation</li>
+            <li><strong>Cultural Context:</strong> Your background influences which musical patterns feel natural and emotionally resonant</li>
+            <li><strong>Brain Chemistry:</strong> People's brains respond differently to musical patterns based on their unique neurobiology</li>
+        </ul>
+    </section>
+
+    <section class="section">
+        <h2>Important Safety and Health Tips</h2>
+        <ul>
+            <li><strong>Hearing Safety:</strong> Keep music below 70 dB to prevent hearing damage</li>
+            <li><strong>Brain Fatigue:</strong> Even at safe volumes, prolonged listening during demanding tasks can cause cognitive fatigue—take breaks!</li>
+            <li><strong>Volume Balance:</strong> Adjust volume based on activity—lower for studying, moderate to high for exercise</li>
+            <li><strong>Listen to Your Body:</strong> If you feel tired or distracted, it might be time for a music break</li>
+        </ul>
+    </section>
+
+    <div class="button-container">
+        <a href="index.html" class="back-button">Back to Home</a>
+    </div>
+</div>
+
+<footer>
+    <p>MYP Personal Project 2025–2026 | Created by Faris Alakeel</p>
+</footer>
+
+</body>
+</html>
