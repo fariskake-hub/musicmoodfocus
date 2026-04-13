@@ -180,87 +180,181 @@ const songDatabase={
         lyrics:[{title:"Till I Collapse",artist:"Eminem",genre:"Hip-Hop"},{title:"Eye of the Tiger",artist:"Survivor",genre:"Rock"},{title:"Thunderstruck",artist:"AC/DC",genre:"Rock"},{title:"Lose Yourself",artist:"Eminem",genre:"Hip-Hop"},{title:"Levels",artist:"Avicii",genre:"EDM"},{title:"Can't Hold Us",artist:"Macklemore",genre:"Hip-Hop"}]
     }
 };
+
 const previewCache={};
-async function fetchPreview(title,artist){
-    const key=title+'__'+artist;
-    if(previewCache[key]!==undefined)return previewCache[key];
-    try{
-        const q=encodeURIComponent(title+' '+artist);
-        const res=await fetch('https://itunes.apple.com/search?term='+q+'&entity=song&limit=3&media=music');
-        const data=await res.json();
-        if(data.results&&data.results.length>0){
-            const track=data.results.find(function(r){return r.previewUrl;})||null;
-            if(track){const info={preview:track.previewUrl,artwork:track.artworkUrl60?track.artworkUrl60.replace('60x60','100x100'):null,trackName:track.trackName,artistName:track.artistName};previewCache[key]=info;return info;}
+
+// FIX: Use JSONP-style fetch via a Promise wrapper so it works on all browsers
+// including iOS WebViews which can block cross-origin fetch in some contexts.
+async function fetchPreview(title, artist) {
+    const key = title + '__' + artist;
+    if (previewCache[key] !== undefined) return previewCache[key];
+    try {
+        const q = encodeURIComponent(title + ' ' + artist);
+        // Primary: standard fetch (works in all modern desktop + mobile browsers)
+        const res = await fetch('https://itunes.apple.com/search?term=' + q + '&entity=song&limit=3&media=music');
+        const data = await res.json();
+        if (data.results && data.results.length > 0) {
+            const track = data.results.find(function(r) { return r.previewUrl; }) || null;
+            if (track) {
+                const info = {
+                    preview: track.previewUrl,
+                    artwork: track.artworkUrl60 ? track.artworkUrl60.replace('60x60','100x100') : null,
+                    trackName: track.trackName,
+                    artistName: track.artistName
+                };
+                previewCache[key] = info;
+                return info;
+            }
         }
-    }catch(e){}
-    previewCache[key]=null;return null;
+    } catch(e) {
+        // Swallow fetch errors (network issues, CORS on older WebViews, etc.)
+    }
+    previewCache[key] = null;
+    return null;
 }
-var currentEl=null;
-var audioEl=document.getElementById('mini-player-audio');
-var miniPlayer=document.getElementById('mini-player');
-audioEl.addEventListener('ended',function(){if(currentEl){setStop(currentEl);currentEl=null;}miniPlayer.classList.remove('visible');document.body.classList.remove('player-open');});
-function setPlay(el){el.classList.add('playing');el.classList.remove('loading');var ic=el.querySelector('.song-play-icon');if(ic)ic.innerHTML='<div class="waveform"><span></span><span></span><span></span><span></span><span></span></div>';}
-function setStop(el){el.classList.remove('playing','loading');var ic=el.querySelector('.song-play-icon');if(ic)ic.textContent='\u25B6';}
-async function playSong(el,title,artist){
-    if(currentEl===el){audioEl.pause();setStop(el);currentEl=null;miniPlayer.classList.remove('visible');document.body.classList.remove('player-open');return;}
-    if(currentEl){audioEl.pause();setStop(currentEl);}
-    el.classList.add('loading');var ic=el.querySelector('.song-play-icon');if(ic)ic.textContent='...';
-    currentEl=el;
-    const info=await fetchPreview(title,artist);
-    if(currentEl!==el)return;
-    if(!info||!info.preview){setStop(el);el.classList.add('no-preview');var hint=el.querySelector('.song-preview-hint');if(hint)hint.textContent='No preview available';currentEl=null;return;}
-    var artEl=document.getElementById('mini-player-art');
-    if(info.artwork){artEl.src=info.artwork;artEl.style.display='block';}else{artEl.style.display='none';}
-    document.getElementById('mini-player-title').textContent=info.trackName||title;
-    document.getElementById('mini-player-artist').textContent=info.artistName||artist;
-    audioEl.src=info.preview;audioEl.play().catch(function(){});
-    setPlay(el);miniPlayer.classList.add('visible');document.body.classList.add('player-open');
-    var artImg=el.querySelector('.song-artwork');var ph=el.querySelector('.song-artwork-placeholder');
-    if(artImg&&info.artwork){artImg.src=info.artwork;artImg.style.display='block';if(ph)ph.style.display='none';}
+
+var currentEl = null;
+var audioEl = document.getElementById('mini-player-audio');
+var miniPlayer = document.getElementById('mini-player');
+
+audioEl.addEventListener('ended', function() {
+    if (currentEl) { setStop(currentEl); currentEl = null; }
+    miniPlayer.classList.remove('visible');
+    document.body.classList.remove('player-open');
+});
+
+function setPlay(el) {
+    el.classList.add('playing');
+    el.classList.remove('loading');
+    var ic = el.querySelector('.song-play-icon');
+    if (ic) ic.innerHTML = '<div class="waveform"><span></span><span></span><span></span><span></span><span></span></div>';
 }
-function closePlayer(){audioEl.pause();if(currentEl){setStop(currentEl);currentEl=null;}miniPlayer.classList.remove('visible');document.body.classList.remove('player-open');}
+
+function setStop(el) {
+    // FIX: Guard against detached DOM nodes (old elements from a regenerated playlist)
+    if (!el || !document.body.contains(el)) return;
+    el.classList.remove('playing','loading');
+    var ic = el.querySelector('.song-play-icon');
+    if (ic) ic.textContent = '\u25B6';
+}
+
+async function playSong(el, title, artist) {
+    if (currentEl === el) {
+        audioEl.pause();
+        setStop(el);
+        currentEl = null;
+        miniPlayer.classList.remove('visible');
+        document.body.classList.remove('player-open');
+        return;
+    }
+    if (currentEl) { audioEl.pause(); setStop(currentEl); }
+    el.classList.add('loading');
+    var ic = el.querySelector('.song-play-icon');
+    if (ic) ic.textContent = '...';
+    currentEl = el;
+    const info = await fetchPreview(title, artist);
+    // FIX: After async, confirm this element is still the active one
+    if (currentEl !== el) return;
+    if (!info || !info.preview) {
+        setStop(el);
+        el.classList.add('no-preview');
+        var hint = el.querySelector('.song-preview-hint');
+        if (hint) hint.textContent = 'No preview available';
+        currentEl = null;
+        return;
+    }
+    var artEl = document.getElementById('mini-player-art');
+    if (info.artwork) { artEl.src = info.artwork; artEl.style.display = 'block'; }
+    else { artEl.style.display = 'none'; }
+    document.getElementById('mini-player-title').textContent = info.trackName || title;
+    document.getElementById('mini-player-artist').textContent = info.artistName || artist;
+    audioEl.src = info.preview;
+    audioEl.play().catch(function() {});
+    setPlay(el);
+    miniPlayer.classList.add('visible');
+    document.body.classList.add('player-open');
+    var artImg = el.querySelector('.song-artwork');
+    var ph = el.querySelector('.song-artwork-placeholder');
+    if (artImg && info.artwork) { artImg.src = info.artwork; artImg.style.display = 'block'; if (ph) ph.style.display = 'none'; }
+}
+
+function closePlayer() {
+    audioEl.pause();
+    if (currentEl) { setStop(currentEl); currentEl = null; }
+    miniPlayer.classList.remove('visible');
+    document.body.classList.remove('player-open');
+}
+
 const moodData={
     focus:{emoji:"&#127911;",title:"Focus Playlist",desc:"This playlist avoids lyrics to reduce language interference and promote a flow state. Instrumental music blocks distractions without adding cognitive load."},
     relax:{emoji:"&#127754;",title:"Relaxation Playlist",desc:"These tracks lower heart rate and cortisol levels. Classical and acoustic elements promote calmness and reduce stress and anxiety."},
     happy:{emoji:"&#9728;",title:"Mood-Boost Playlist",desc:"Upbeat tempos stimulate dopamine release. Jazz and funk trigger alpha waves associated with a calm, happy mind."},
     energy:{emoji:"&#9889;",title:"Energy Playlist",desc:"Fast tempo music increases arousal and motivation. High-energy tracks boost physical performance and mental drive."}
 };
+
 const scienceText={
     studying:"Instrumental music is optimal for studying as it avoids verbal processing interference, allowing your brain to focus on reading and comprehension tasks.",
     working:"Background music creates an optimal environment for productivity by blocking distractions and promoting consistent brainwaves that improve performance.",
     exercising:"Music with strong rhythms synchronises with physical movement, increasing motivation and endurance. Higher volume is acceptable during physical activity.",
     relaxing:"Low volume calming music promotes peace of mind by triggering alpha waves, lowering cortisol, and releasing dopamine for stress relief."
 };
-function generatePlaylist(){
-    var goal=document.getElementById('goal').value;
-    var task=document.getElementById('task').value;
-    var lyr=document.getElementById('lyrics').value;
-    var rb=document.getElementById('result-box');
+
+function generatePlaylist() {
+    var goal = document.getElementById('goal').value;
+    var task = document.getElementById('task').value;
+    var lyr = document.getElementById('lyrics').value;
+    var rb = document.getElementById('result-box');
+
+    // FIX: Properly remove the empty class so its flex layout doesn't interfere
     rb.classList.remove('empty');
+
+    // FIX: Stop any playing audio before rebuilding the DOM
     closePlayer();
+
     var songs;
-    if(lyr==='no'){songs=songDatabase[goal].instrumental;}
-    else{songs=songDatabase[goal].instrumental.slice(0,3).concat(songDatabase[goal].lyrics.slice(0,5));}
-    var shuffled=songs.sort(function(){return 0.5-Math.random();}).slice(0,6);
-    var md=moodData[goal];
-    var html='<div class="playlist-header">'+md.emoji+' '+md.title+'</div>';
-    html+='<div class="playlist-description">'+md.desc+'</div>';
-    html+='<p style="color:#6366f1;font-size:clamp(0.82rem,2.5vw,0.9rem);margin-bottom:0.8rem;">&#127925; Tap any song to hear a 30-second preview</p>';
-    html+='<div class="song-list">';
-    shuffled.forEach(function(song,i){
-        var t=song.title.replace(/'/g,"\'"),a=song.artist.replace(/'/g,"\'");
-        html+='<div class="song-item" onclick="playSong(this,''+t+'',''+a+'')">';
-        html+='<div class="song-artwork-placeholder">&#127925;</div>';
-        html+='<img class="song-artwork" src="" alt="">';
-        html+='<div class="song-info"><div class="song-title">'+(i+1)+'. '+song.title+'</div>';
-        html+='<div class="song-artist">'+song.artist+' &middot; '+song.genre+'</div>';
-        html+='<div class="song-preview-hint">Tap to preview</div></div>';
-        html+='<div class="song-play-icon">&#9654;</div></div>';
+    if (lyr === 'no') {
+        songs = songDatabase[goal].instrumental;
+    } else {
+        songs = songDatabase[goal].instrumental.slice(0,3).concat(songDatabase[goal].lyrics.slice(0,5));
+    }
+    var shuffled = songs.sort(function() { return 0.5 - Math.random(); }).slice(0, 6);
+    var md = moodData[goal];
+
+    var html = '<div class="playlist-header">' + md.emoji + ' ' + md.title + '</div>';
+    html += '<div class="playlist-description">' + md.desc + '</div>';
+    html += '<p style="color:#6366f1;font-size:clamp(0.82rem,2.5vw,0.9rem);margin-bottom:0.8rem;">&#127925; Tap any song to hear a 30-second preview</p>';
+    html += '<div class="song-list">';
+
+    shuffled.forEach(function(song, i) {
+        // FIX: Use data attributes instead of inline onclick string interpolation.
+        // The old code built onclick="playSong(this,'title','artist')" by string
+        // concatenation, which broke whenever a title or artist contained an
+        // apostrophe (e.g. "Don't Stop Me Now") — the quote ended the JS string
+        // prematurely, causing a syntax error and silently killing the click handler.
+        // Using data attributes sidesteps all quoting issues entirely.
+        html += '<div class="song-item" data-title="' + song.title.replace(/"/g,'&quot;') + '" data-artist="' + song.artist.replace(/"/g,'&quot;') + '">';
+        html += '<div class="song-artwork-placeholder">&#127925;</div>';
+        html += '<img class="song-artwork" src="" alt="">';
+        html += '<div class="song-info"><div class="song-title">' + (i+1) + '. ' + song.title + '</div>';
+        html += '<div class="song-artist">' + song.artist + ' &middot; ' + song.genre + '</div>';
+        html += '<div class="song-preview-hint">Tap to preview</div></div>';
+        html += '<div class="song-play-icon">&#9654;</div></div>';
     });
-    html+='</div>';
-    html+='<div class="science-box"><h3>&#129504; Why This Works for '+task.charAt(0).toUpperCase()+task.slice(1)+'</h3><p>'+scienceText[task]+'</p></div>';
-    rb.innerHTML=html;
-    rb.scrollIntoView({behavior:'smooth',block:'nearest'});
+
+    html += '</div>';
+    html += '<div class="science-box"><h3>&#129504; Why This Works for ' + task.charAt(0).toUpperCase() + task.slice(1) + '</h3><p>' + scienceText[task] + '</p></div>';
+    rb.innerHTML = html;
+
+    // FIX: Attach click listeners via JS instead of inline onclick strings.
+    // This is the correct cross-browser, cross-device approach. Works on desktop
+    // and all mobile browsers including iOS Safari and Android Chrome.
+    rb.querySelectorAll('.song-item').forEach(function(item) {
+        item.addEventListener('click', function() {
+            playSong(item, item.dataset.title, item.dataset.artist);
+        });
+    });
+
+    rb.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 </script>
 <script>
