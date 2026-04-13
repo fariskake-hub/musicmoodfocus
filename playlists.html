@@ -157,7 +157,7 @@
         <div id="mini-player-title"></div>
         <div id="mini-player-artist"></div>
     </div>
-    <audio id="mini-player-audio" controls></audio>
+    <audio id="mini-player-audio" controls preload="metadata" playsinline webkit-playsinline crossorigin="anonymous"></audio>
     <button id="mini-player-close" onclick="closePlayer()" aria-label="Close player">&#10005;</button>
 </div>
 
@@ -185,15 +185,56 @@ const previewCache={};
 
 // FIX: Use JSONP-style fetch via a Promise wrapper so it works on all browsers
 // including iOS WebViews which can block cross-origin fetch in some contexts.
+async function fetchJSONP(url) {
+    return new Promise(function(resolve, reject) {
+        var callbackName = 'itunesCallback_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+        window[callbackName] = function(data) {
+            cleanup();
+            resolve(data);
+        };
+        function cleanup() {
+            delete window[callbackName];
+            if (script.parentNode) script.parentNode.removeChild(script);
+        }
+        var script = document.createElement('script');
+        script.src = url + (url.indexOf('?') === -1 ? '?' : '&') + 'callback=' + callbackName;
+        script.onerror = function() {
+            cleanup();
+            reject(new Error('JSONP request failed'));
+        };
+        document.body.appendChild(script);
+    });
+}
+
 async function fetchPreview(title, artist) {
     const key = title + '__' + artist;
     if (previewCache[key] !== undefined) return previewCache[key];
+    const q = encodeURIComponent(title + ' ' + artist);
+    const url = 'https://itunes.apple.com/search?term=' + q + '&entity=song&limit=3&media=music&country=US';
     try {
-        const q = encodeURIComponent(title + ' ' + artist);
-        // Primary: standard fetch (works in all modern desktop + mobile browsers)
-        const res = await fetch('https://itunes.apple.com/search?term=' + q + '&entity=song&limit=3&media=music');
-        const data = await res.json();
-        if (data.results && data.results.length > 0) {
+        const res = await fetch(url, { mode: 'cors' });
+        if (res.ok) {
+            const data = await res.json();
+            if (data.results && data.results.length > 0) {
+                const track = data.results.find(function(r) { return r.previewUrl; }) || null;
+                if (track) {
+                    const info = {
+                        preview: track.previewUrl,
+                        artwork: track.artworkUrl60 ? track.artworkUrl60.replace('60x60','100x100') : null,
+                        trackName: track.trackName,
+                        artistName: track.artistName
+                    };
+                    previewCache[key] = info;
+                    return info;
+                }
+            }
+        }
+    } catch (e) {
+        // fallback to JSONP if direct CORS fetch fails on mobile browsers or WebViews
+    }
+    try {
+        const data = await fetchJSONP(url);
+        if (data && data.results && data.results.length > 0) {
             const track = data.results.find(function(r) { return r.previewUrl; }) || null;
             if (track) {
                 const info = {
@@ -206,8 +247,8 @@ async function fetchPreview(title, artist) {
                 return info;
             }
         }
-    } catch(e) {
-        // Swallow fetch errors (network issues, CORS on older WebViews, etc.)
+    } catch (e) {
+        // if JSONP also fails, return null below
     }
     previewCache[key] = null;
     return null;
