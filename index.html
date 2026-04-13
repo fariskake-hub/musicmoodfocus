@@ -2,730 +2,245 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Music, Mood, and Focus</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; color:#2d3748; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); }
+        header { background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:white; padding:clamp(1rem,4vw,2rem) 1rem; text-align:center; box-shadow:0 4px 6px rgba(0,0,0,0.1); }
+        header h1 { font-size:clamp(1.4rem,5vw,2.5rem); margin-bottom:0.5rem; font-weight:700; }
+        nav { background:rgba(255,255,255,0.15); }
+        nav a { color:white; background:rgba(255,255,255,0.1); }
+        nav a:hover { background:rgba(255,255,255,0.3); color:white; }
+        @media (max-width:700px) { nav a { color:white !important; } }
+        main { max-width:1200px; margin:0 auto; padding:clamp(10px,3vw,20px) clamp(10px,3vw,16px); }
+        section { background:white; margin:clamp(12px,3vw,2rem) 0; padding:clamp(1rem,3vw,2.5rem); border-radius:15px; box-shadow:0 10px 30px rgba(0,0,0,0.15); }
+        section h2 { color:#667eea; font-size:clamp(1.3rem,4vw,2rem); margin-bottom:1rem; font-weight:700; border-bottom:3px solid #667eea; padding-bottom:0.5rem; display:inline-block; }
+        section h3 { color:#764ba2; font-size:clamp(1rem,3.5vw,1.4rem); margin:1rem 0 0.6rem; font-weight:600; }
+        section p  { color:#4a5568; line-height:1.8; font-size:clamp(0.9rem,2.5vw,1.05rem); }
+        article { margin:1rem 0; padding:clamp(0.9rem,2vw,1.5rem); background:linear-gradient(135deg,#f6f8fb,#e9ecef); border-radius:10px; border-left:5px solid #667eea; transition:all 0.3s; }
+        #mood-selector { background:linear-gradient(135deg,#f093fb,#f5576c); color:white; }
+        #mood-selector h2 { color:white; border-bottom:3px solid white; }
+        #moods { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1rem; margin-top:1rem; }
+        #moods > div { background:rgba(255,255,255,0.2); padding:clamp(0.8rem,2vw,1.5rem); border-radius:12px; text-align:center; border:2px solid rgba(255,255,255,0.3); transition:all 0.3s; }
+        #moods h3 { color:white; font-size:clamp(1rem,3vw,1.5rem); margin-bottom:0.4rem; }
+        #moods p  { color:rgba(255,255,255,0.95); font-size:clamp(0.85rem,2.5vw,1rem); }
+        #science-facts { background:linear-gradient(135deg,#4facfe,#00f2fe); color:white; }
+        #science-facts h2 { color:white; border-bottom:3px solid white; }
+        #science-facts article { background:rgba(255,255,255,0.2); border-left:5px solid white; }
+        #science-facts h3,#science-facts p { color:white; }
+        #reflection { background:linear-gradient(135deg,#fa709a,#fee140); }
+        #reflection h2 { color:#c53030; border-bottom:3px solid #c53030; }
+        #reflection ul { list-style:none; margin-top:1rem; }
+        #reflection li { background:rgba(255,255,255,0.5); padding:clamp(0.7rem,2vw,1rem); margin:0.7rem 0; border-radius:8px; border-left:5px solid #c53030; color:#2d3748; font-weight:500; font-size:clamp(0.9rem,2.5vw,1rem); transition:all 0.3s; }
+        .playlist-options { display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr)); gap:0.8rem; margin-top:1rem; }
+        .playlist-options button { padding:clamp(0.8rem,2vw,1.2rem); font-size:clamp(0.9rem,2.5vw,1.1rem); font-weight:700; border:none; border-radius:12px; cursor:pointer; transition:all 0.3s; color:white; min-height:52px; font-family:inherit; }
+        button[onclick*="focus"]     { background:linear-gradient(135deg,#14b8a6,#0d9488); }
+        button[onclick*="relax"]     { background:linear-gradient(135deg,#8b5cf6,#7c3aed); }
+        button[onclick*="happy"]     { background:linear-gradient(135deg,#f59e0b,#d97706); }
+        button[onclick*="motivated"] { background:linear-gradient(135deg,#ef4444,#dc2626); }
+        .playlist-options button:active { opacity:0.85; transform:scale(0.98); }
+        #feedback { background:linear-gradient(135deg,#a8edea,#fed6e3); }
+        #feedback h2 { color:#2d3748; }
+        form { display:flex; flex-direction:column; gap:0.8rem; margin-top:1rem; }
+        label { font-weight:600; color:#2d3748; font-size:clamp(0.9rem,2.5vw,1.05rem); }
+        select,textarea { padding:0.8rem; border:2px solid #cbd5e0; border-radius:8px; font-family:inherit; transition:all 0.3s; width:100%; }
+        select:focus,textarea:focus { outline:none; border-color:#667eea; box-shadow:0 0 0 3px rgba(102,126,234,0.15); }
+        form button { padding:1rem; background:linear-gradient(135deg,#667eea,#764ba2); color:white; border:none; border-radius:8px; font-size:clamp(0.95rem,2.5vw,1.1rem); font-weight:600; cursor:pointer; min-height:52px; font-family:inherit; transition:all 0.3s; }
+        footer { background:linear-gradient(135deg,#2d3748,#1a202c); color:white; text-align:center; padding:clamp(1rem,3vw,2rem) 1rem; margin-top:1rem; }
+        footer p { color:white; font-size:clamp(0.85rem,2.5vw,1rem); }
+        /* new tools banner */
+        .tools-banner { background:linear-gradient(135deg,#1e293b,#0f172a); padding:clamp(1rem,3vw,1.5rem); border-radius:15px; margin:1rem 0; box-shadow:0 8px 20px rgba(0,0,0,0.2); }
+        .tools-banner h2 { color:#93c5fd; border-bottom:3px solid #93c5fd; font-size:clamp(1.2rem,4vw,1.8rem); }
+        .tools-banner p  { color:#94a3b8; font-size:clamp(0.88rem,2.5vw,1rem); margin-bottom:1rem; }
+        .tools-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:0.8rem; margin-top:1rem; }
+        .tool-btn { padding:clamp(0.8rem,2vw,1rem); border:none; border-radius:12px; cursor:pointer; font-size:clamp(0.88rem,2.5vw,1rem); font-weight:700; color:white; min-height:56px; font-family:inherit; transition:opacity 0.2s; }
+        .tool-btn:active { opacity:0.82; }
+        .tool-btn.matcher { background:linear-gradient(135deg,#6366f1,#4f46e5); }
+        .tool-btn.timer   { background:linear-gradient(135deg,#14b8a6,#0d9488); }
+    
+    /* RESET */
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html { scroll-behavior:smooth; }
+    body { line-height:1.6; min-height:100vh; min-height:100dvh; }
+    img  { max-width:100%; display:block; }
+    /* PREVENT iOS ZOOM ON INPUTS */
+    input,select,textarea { font-size:16px !important; }
+
+    /* ── NAV ─────────────────────────────────────────────────────────────── */
+    nav { position:relative; }
+    .nav-toggle {
+        display:none; width:100%; background:none; border:none;
+        color:#cbd5e1; font-size:1rem; font-weight:600; font-family:inherit;
+        padding:0 20px; text-align:left; cursor:pointer;
+        align-items:center; justify-content:space-between;
+        min-height:52px; border-bottom:1px solid rgba(255,255,255,0.07);
+    }
+    .nav-icon { font-size:1.1rem; transition:transform 0.25s; display:inline-block; }
+    .nav-icon.open { transform:rotate(180deg); }
+    nav ul { list-style:none; display:flex; justify-content:center; flex-wrap:wrap; padding:10px 8px; gap:4px; }
+    nav li { margin:3px 4px; }
+    nav a {
+        color:#cbd5e1; text-decoration:none; font-weight:600; font-size:0.82rem;
+        padding:8px 13px; border-radius:20px; background:rgba(255,255,255,0.05);
+        display:block; transition:background 0.2s, color 0.2s; white-space:nowrap;
+    }
+    nav a:hover { color:#a78bfa; background:rgba(167,139,250,0.15); }
+    @media (max-width:700px) {
+        .nav-toggle { display:flex; }
+        nav ul { display:none !important; flex-direction:column !important; padding:0 0 10px !important; gap:0 !important; flex-wrap:nowrap !important; }
+        nav ul.open { display:flex !important; }
+        nav li { margin:0 !important; width:100% !important; }
+        nav a { border-radius:0 !important; padding:14px 22px !important; background:none !important; font-size:0.95rem !important; white-space:normal !important; border-bottom:1px solid rgba(255,255,255,0.05) !important; min-height:52px; display:flex !important; align-items:center; }
+        nav a:active { background:rgba(167,139,250,0.12) !important; color:#a78bfa !important; }
+    }
+
+    /* ── DISABLE STUCK HOVER ON TOUCH ────────────────────────────────────── */
+    @media (hover:none) and (pointer:coarse) {
+        .card:hover,.section:hover,article:hover,.term-card:hover,.theory-card:hover,
+        .song-card:hover,.process-item:hover,.genre-effects:hover,.key-point:hover,
+        .comparison-card:hover,.intro-section:hover,.brain-section:hover,
+        .mechanisms-section:hover,.science-box:hover,form:hover,.part2:hover,
+        #moods > div:hover,#reflection li:hover,.question-box:hover { transform:none !important; }
+        .flip-card:hover .flip-card-inner { transform:none !important; }
+        .flip-card:active .flip-card-inner { transform:rotateY(180deg); }
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #2d3748;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            
-        }
-
-        header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 2rem 0rem;
-            text-align: center;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        nav {
-            background-color: rgba(255, 255, 255, 0.15);
-            padding: 1rem 0;
-            
-        }
-
-        nav ul {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        nav li {
-            margin: 0.5rem 1rem;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            transition: all 0.3s ease;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        nav a:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        section {
-            background: white;
-            margin: 2rem 0;
-            padding: 2.5rem;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        section h2 {
-            color: #667eea;
-            font-size: 2rem;
-            margin-bottom: 1.5rem;
-            font-weight: 700;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 0.5rem;
-            display: inline-block;
-        }
-
-        section h3 {
-            color: #764ba2;
-            font-size: 1.4rem;
-            margin: 1.5rem 0 0.8rem;
-            font-weight: 600;
-        }
-
-        section p {
-            color: #4a5568;
-            line-height: 1.8;
-            font-size: 1.05rem;
-        }
-
-        article {
-            margin: 1.5rem 0;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
-            border-radius: 10px;
-            border-left: 5px solid #667eea;
-            transition: all 0.3s ease;
-        }
-
-        article:hover {
-            transform: translateX(5px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
-        }
-
-        #mood-selector {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-
-        #mood-selector h2 {
-            color: white;
-            border-bottom: 3px solid white;
-        }
-
-        #moods {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        #moods > div {
-            background: rgba(255, 255, 255, 0.2);
-            padding: 1.5rem;
-            border-radius: 12px;
-            text-align: center;
-            
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        #moods > div:hover {
-            background: rgba(255, 255, 255, 0.35);
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-        }
-
-        #moods h3 {
-            color: white;
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        #moods p {
-            color: rgba(255, 255, 255, 0.95);
-            font-size: 1rem;
-        }
-
-        #science-facts {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
-        #science-facts h2 {
-            color: white;
-            border-bottom: 3px solid white;
-        }
-
-        #science-facts article {
-            background: rgba(255, 255, 255, 0.2);
-            border-left: 5px solid white;
-            
-        }
-
-        #science-facts article:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        #science-facts h3 {
-            color: white;
-            margin-top: 0;
-        }
-
-        #science-facts p {
-            color: rgba(255, 255, 255, 0.95);
-        }
-
-        #reflection {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-        }
-
-        #reflection h2 {
-            color: #c53030;
-            border-bottom: 3px solid #c53030;
-        }
-
-        #reflection p {
-            color: #2d3748;
-            font-weight: 600;
-        }
-
-        #reflection ul {
-            list-style: none;
-            margin-top: 1rem;
-        }
-
-        #reflection li {
-            background: rgba(255, 255, 255, 0.5);
-            padding: 1rem;
-            margin: 0.8rem 0;
-            border-radius: 8px;
-            border-left: 5px solid #c53030;
-            color: #2d3748;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-
-        #reflection li:hover {
-            background: rgba(255, 255, 255, 0.7);
-            transform: translateX(5px);
-        }
-
-        .playlist-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        .playlist-options button {
-            padding: 1.2rem;
-            font-size: 1.1rem;
-            font-weight: 700;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: white;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        button[onclick*="focus"] {
-            background: linear-gradient(135deg, #14b8a6, #0d9488);
-        }
-
-        button[onclick*="relax"] {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-        }
-
-        button[onclick*="happy"] {
-            background: linear-gradient(135deg, #f59e0b, #d97706);
-        }
-
-        button[onclick*="motivated"] {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-        }
-
-        .playlist-options button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-        }
-
-        #feedback {
-            background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        }
-
-        #feedback h2 {
-            color: #2d3748;
-        }
-
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            margin-top: 1.5rem;
-        }
-
-        label {
-            font-weight: 600;
-            color: #2d3748;
-            font-size: 1.05rem;
-        }
-
-        select, textarea {
-            padding: 0.8rem;
-            border: 2px solid #cbd5e0;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-family: inherit;
-            transition: all 0.3s ease;
-        }
-
-        select:focus, textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.15);
-        }
-
-        form button {
-            padding: 1rem;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        form button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-        }
-
-        footer {
-            background: linear-gradient(135deg, #2d3748, #1a202c);
-            color: white;
-            text-align: center;
-            padding: 2rem;
-            margin-top: 2rem;
-        }
-
-        footer p {
-            color: white;
-            font-size: 1rem;
-        }
-
-        /* Tablet Styles (768px - 1024px) */
-        @media (max-width: 1024px) {
-            main {
-                padding: 0 1.5rem;
-            }
-            
-            #moods {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .playlist-options {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-
-        /* Mobile Styles (up to 768px) */
-        @media (max-width: 768px) {
-            header {
-                padding: 1.5rem 1rem;
-            }
-
-            header h1 {
-                font-size: 1.8rem;
-                line-height: 1.3;
-            }
-
-            nav {
-                padding: 0.8rem 0;
-            }
-
-            nav ul {
-                flex-direction: column;
-                align-items: center;
-                gap: 0.3rem;
-            }
-
-            nav li {
-                margin: 0.3rem 0;
-                width: 90%;
-                text-align: center;
-            }
-
-            nav a {
-                display: block;
-                width: 100%;
-                padding: 0.8rem 1rem;
-            }
-
-            main {
-                margin: 1rem auto;
-                padding: 0 0.8rem;
-            }
-
-            section {
-                padding: 1.5rem;
-                margin: 1.5rem 0;
-                border-radius: 12px;
-            }
-
-            section h2 {
-                font-size: 1.6rem;
-                margin-bottom: 1rem;
-            }
-
-            section h3 {
-                font-size: 1.2rem;
-            }
-
-            section p {
-                font-size: 1rem;
-                line-height: 1.7;
-            }
-
-            article {
-                padding: 1.2rem;
-                margin: 1.2rem 0;
-            }
-
-            #moods {
-                grid-template-columns: 1fr;
-                gap: 1rem;
-            }
-
-            #moods > div {
-                padding: 1.2rem;
-            }
-
-            #moods h3 {
-                font-size: 1.3rem;
-            }
-
-            .playlist-options {
-                grid-template-columns: 1fr;
-                gap: 0.8rem;
-            }
-
-            .playlist-options button {
-                padding: 1rem;
-                font-size: 1rem;
-            }
-
-            form {
-                gap: 0.8rem;
-            }
-
-            label {
-                font-size: 1rem;
-            }
-
-            select, textarea {
-                padding: 0.7rem;
-                font-size: 0.95rem;
-            }
-
-            form button {
-                padding: 0.9rem;
-                font-size: 1rem;
-            }
-
-            footer {
-                padding: 1.5rem 1rem;
-            }
-
-            footer p {
-                font-size: 0.9rem;
-            }
-        }
-
-        /* Small Mobile Styles (up to 480px) */
-        @media (max-width: 480px) {
-            header h1 {
-                font-size: 1.5rem;
-            }
-
-            section {
-                padding: 1.2rem;
-            }
-
-            section h2 {
-                font-size: 1.4rem;
-            }
-
-            section h3 {
-                font-size: 1.1rem;
-            }
-
-            section p {
-                font-size: 0.95rem;
-            }
-
-            article {
-                padding: 1rem;
-            }
-
-            #moods > div {
-                padding: 1rem;
-            }
-
-            #moods h3 {
-                font-size: 1.2rem;
-            }
-
-            #moods p {
-                font-size: 0.9rem;
-            }
-
-            #reflection li {
-                padding: 0.8rem;
-                font-size: 0.95rem;
-            }
-
-            .playlist-options button {
-                padding: 0.9rem;
-                font-size: 0.95rem;
-            }
-        }
-
-        /* Touch device optimizations */
-        @media (hover: none) and (pointer: coarse) {
-            nav a:active {
-                background-color: rgba(255, 255, 255, 0.3);
-            }
-
-            .playlist-options button:active {
-                transform: translateY(-1px);
-            }
-
-            article:hover {
-                transform: none;
-            }
-
-            #moods > div:hover {
-                transform: none;
-            }
-
-            /* Increase touch target sizes */
-            nav a {
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-
-            .playlist-options button {
-                min-height: 44px;
-            }
-        }
     </style>
 </head>
-
 <body>
+<header>
+    <h1>How Music Affects Mood and Focus</h1>
+</header>
+<nav>
+    <button class="nav-toggle" id="nav-toggle" onclick="toggleNav()" aria-expanded="false" aria-label="Open navigation">
+        Menu <span class="nav-icon" id="nav-icon">&#9662;</span>
+    </button>
+    <ul id="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
+        <li><a href="moodandfocus.html">Mood &amp; Focus</a></li>
+        <li><a href="musicandemotionanalysis.html">Emotion Analysis</a></li>
+        <li><a href="playlists.html">Playlists</a></li>
+        <li><a href="glossary.html">Glossary</a></li>
+        <li><a href="moodmatcher.html">&#127925; Mood Matcher</a></li>
+        <li><a href="focustimer.html">&#9200; Focus Timer</a></li>
+        <li><a href="index.html#feedback">Feedback</a></li>
+    </ul>
+</nav>
+<main>
+    <section id="introduction">
+        <h2>Project Introduction</h2>
+        <p>This website explores the science behind how music affects mood and focus. You can learn, reflect, and receive music recommendations based on scientific research.</p>
+    </section>
 
-    <!-- Header and Navigation -->
-    <header>
-        <h1>How Music Affects Mood and Focus</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
-                <li><a href="moodandfocus.html">Mood and Focus</a></li>
-                <li><a href="musicandemotionanalysis.html">Music and Emotion Analysis</a></li>
-                <li><a href="playlists.html">Playlists</a></li>
-                <li><a href="glossary.html">Glossary</a></li>
-                <li><a href="index.html#about">About the Project</a></li>
-                <li><a href="#feedback">Feedback</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <!-- Main Content -->
-    <main>
-
-        <!-- Home Section -->
-        <section id="introduction">
-            <h2>Project Introduction</h2>
-            <p>
-                This website explores the science behind how music affects mood and focus.
-                You can learn, reflect, and receive music recommendations based on scientific research. This website was made for people that would like to know more about music and its relation to the brain and in return, how it affects our mood and focus.
-            </p>
-        </section>
-<section id="mood-selector">
-    <h2>Explore Music by Mood</h2>
-
-    <div id="moods">
-        <div>
-            <h3>Relax</h3>
-            <p>Slow, Relaxed music helps reduce stress and anxiety.</p>
+    <section id="mood-selector">
+        <h2>Explore Music by Mood</h2>
+        <div id="moods">
+            <div><h3>Relax</h3><p>Slow, relaxed music helps reduce stress and anxiety.</p></div>
+            <div><h3>Focused</h3><p>Instrumental music improves concentration.</p></div>
+            <div><h3>Motivated</h3><p>Fast music boosts motivation and alertness.</p></div>
+            <div><h3>Happy</h3><p>Upbeat music enhances mood and positivity.</p></div>
         </div>
+    </section>
 
-        <div>
-            <h3>Focused</h3>
-            <p>Instrumental music improves concentration.</p>
+    <section id="science-facts">
+        <h2>Did You Know?</h2>
+        <article><h3>Dopamine Release &#127911;</h3><p>Listening to music releases dopamine, the brain's pleasure chemical.</p></article>
+        <article><h3>Focus &amp; Lyrics &#129504;</h3><p>Music with lyrics can reduce performance in reading and writing tasks.</p></article>
+        <article><h3>Flow State &#127754;</h3><p>Lo-fi music promotes a flow state through predictable rhythms.</p></article>
+    </section>
+
+    <section id="science">
+        <article>
+            <h3>Why Different People Prefer Different Genres</h3>
+            <p>People prefer different music genres due to personality, experience, and how their brains respond to musical patterns. Psychological theories such as Music Expectancy Theory explain that emotions arise when musical patterns meet expectations. Cultural background and past memories also influence preference, making musical taste highly personal.</p>
+        </article>
+    </section>
+
+    <section id="mood-focus">
+        <h2>Music, Mood, and Focus</h2>
+        <article><h3>Music and Emotions</h3><p>Music has a strong influence on emotional regulation. Slow and calming music can reduce stress and anxiety by lowering heart rate and cortisol levels, while fast and energetic music can boost excitement and motivation.</p></article>
+        <article><h3>Music and Concentration</h3><p>Instrumental music is generally better for studying because it avoids activating the language-processing areas of the brain. Predictable rhythms help the brain maintain focus and enter a flow state by blocking external distractions.</p></article>
+    </section>
+
+    <section id="reflection">
+        <h2>Reflect</h2>
+        <p>Think about your own experience with music:</p>
+        <ul>
+            <li>What type of music helps you focus best?</li>
+            <li>Do lyrics distract you while studying?</li>
+            <li>How does music affect your mood?</li>
+        </ul>
+    </section>
+
+    <section id="playlists">
+        <h2>Personalised Playlists</h2>
+        <p>Choose your mood or goal to receive scientifically selected music recommendations.</p>
+        <div class="playlist-options">
+            <button onclick="location.href='focus.html'">&#127919; Focus</button>
+            <button onclick="location.href='relax.html'">&#128524; Relax</button>
+            <button onclick="location.href='happy.html'">&#128522; Happy</button>
+            <button onclick="location.href='motivated.html'">&#128293; Motivated</button>
         </div>
+    </section>
 
-        <div>
-            <h3>Motivated</h3>
-            <p>Fast music boosts motivation and alertness.</p>
-        </div>
-
-        <div>
-            <h3>Happy</h3>
-            <p>Upbeat music enhances mood and positivity.</p>
+    <div class="tools-banner">
+        <h2>&#9889; Interactive Tools</h2>
+        <p>Try our two interactive features — works great on your phone!</p>
+        <div class="tools-grid">
+            <button class="tool-btn matcher" onclick="location.href='moodmatcher.html'">&#127925; Mood Matcher</button>
+            <button class="tool-btn timer"   onclick="location.href='focustimer.html'">&#9200; Focus Timer</button>
         </div>
     </div>
-</section>
 
-        
-<section id="science-facts">
-    <h2>Did You Know?</h2>
+    <section id="about">
+        <h2>About This Project</h2>
+        <p>This project was created as an MYP Personal Project under the global context of Scientific and Technical Innovation. It describes the effect of music on mood and focus through scientific research and interactive features.</p>
+    </section>
 
-    <article>
-        <h3>Dopamine Release 🎧</h3>
-        <p>Listening to music releases dopamine, the brain's pleasure chemical.</p>
-    </article>
-
-    <article>
-        <h3>Focus & Lyrics 🧠 </h3>
-        <p>Music with lyrics can reduce performance in reading and writing tasks.</p>
-    </article>
-
-    <article>
-        <h3>Flow State 🌊</h3>
-        <p>Lo-fi music promotes a flow state through predictable rhythms.</p>
-    </article>
-</section>
-<section id="science">
-            <article>
-                <h3>Why Different People Prefer Different Genres</h3>
-                <p>
-                    People prefer different music genres due to personality, experience, and how their brains respond to musical patterns. Psychological theories such as Music Expectancy Theory explain that emotions arise when musical patterns meet expectations. Other theories, including Basic Emotion Theory and Cognitive Appraisal Theory, show that tempo, mode, and personal interpretation shape emotional responses. Cultural background and past memories also influence preference, making musical taste highly personal with our own self.
-                </p>
-            </article>
-        </section>
-
-        <!-- Mood and Focus Section -->
-        <section id="mood-focus">
-            <h2>Music, Mood, and Focus</h2>
-            <article>
-                <h3>Music and Emotions</h3>
-                <p>
-                    Music has a strong influence on emotional regulation. Slow and calming music can reduce stress and anxiety by lowering heart rate and cortisol levels, while fast and energetic music can boost excitement and motivation. Different genres create different emotional effects by activating brainstem reflexes (a part of the brain) and emotional imitation pathways in the brain. These responses explain why people use music to relax, feel understood, or enhance their mood.
-                </p>
-            </article>
-
-            <article>
-                <h3>Music and Concentration</h3>
-                <p>
-                    Music affects concentration differently depending on its structure. Instrumental music is generally better for studying because it avoids activating the language-processing areas of the brain. Music with lyrics can interrupt tasks that require reading, writing, or memory. Research shows that predictable rhythms, such as those found in lo-fi or classical music, help the brain maintain focus and enter a flow state by blocking external distractions.
-                </p>
-            </article>
-        </section>
-        
-<section id="reflection">
-    <h2>Reflect</h2>
-
-    <p>Think about your own experience with music:</p>
-
-    <ul>
-        <li>What type of music helps you focus best?</li>
-        <li>Do lyrics distract you while studying?</li>
-        <li>How does music affect your mood?</li>
-    </ul>
-</section>
-
-        
-        <!-- Playlist Section -->
-        <section id="playlists">
-            <h2>Personalized Playlists</h2>
-            <p>
-                Choose your mood or goal to receive scientifically selected music recommendations.
-            </p>
-
-            <div class="playlist-options">
-                <button onclick="window.location.href='focus.html'">Focus</button>                
-                <button onclick="window.location.href='relax.html'">Relax</button>
-                <button onclick="window.location.href='happy.html'">Happy</button>
-                <button onclick="window.location.href='motivated.html'">Motivated</button>
-            </div>
-                
-
-            <div class="playlist-display">
-                <!-- Playlist will be displayed here based on user selection -->
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section id="about">
-            <h2>About This Project</h2>
-            <p>
-                This project was created as an MYP Personal Project under the global context
-                of Scientific and Technical Innovation. This website was created to describe the effect of music on mood and focus and its phenomenon and what is does in addition to HTML coding.
-            </p>
-
-            
-                
-    
-        </section>
-
-        <!-- Feedback Section -->
-<section id="feedback">
-    <h2>User Feedback</h2>
-    <form action="https://formspree.io/f/mbddyjkr" method="POST">
-        <label for="rating">Rate the website:</label>
-        <select id="rating" name="rating" required>
-            <option value="excellent">Excellent</option>
-            <option value="good">Good</option>
-            <option value="decent">Decent</option>
-            <option value="poor">Poor</option>
-        </select>
-
-        <label for="comments">Comments:</label>
-        <textarea id="comments" name="comments" rows="5" required></textarea>
-
-        <button type="submit">Submit Feedback</button>
-    </form>
-</section>
-
-    </main>
-
-    <!-- Footer -->
-    <footer>
-        <p>
-            MYP Personal Project 2025–2026 | Created by Faris Alakeel
-        </p>
-    </footer>
+    <section id="feedback">
+        <h2>User Feedback</h2>
+        <form action="https://formspree.io/f/mbddyjkr" method="POST">
+            <label for="rating">Rate the website:</label>
+            <select id="rating" name="rating" required>
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="decent">Decent</option>
+                <option value="poor">Poor</option>
+            </select>
+            <label for="comments">Comments:</label>
+            <textarea id="comments" name="comments" rows="4" required placeholder="Your thoughts..."></textarea>
+            <button type="submit">Submit Feedback</button>
+        </form>
+    </section>
+</main>
+<footer><p>MYP Personal Project 2025&#8211;2026 | Created by Faris Alakeel</p></footer>
 <script>
-  if (window.location.hash) {
-    const target = document.querySelector(window.location.hash);
-    if (target) {
-      setTimeout(() => {
-        target.scrollIntoView({ behavior: "smooth" });
-        history.replaceState(null, "", window.location.pathname);
-      }, 100);
-    }
-  }
+if(window.location.hash){
+    var t=document.querySelector(window.location.hash);
+    if(t)setTimeout(function(){t.scrollIntoView({behavior:'smooth'});history.replaceState(null,'',window.location.pathname);},100);
+}
 </script>
-
+<script>
+(function(){
+    function toggleNav(){
+        var m=document.getElementById('nav-menu');
+        var i=document.getElementById('nav-icon');
+        var b=document.getElementById('nav-toggle');
+        if(!m)return;
+        var open=m.classList.toggle('open');
+        if(i)i.classList.toggle('open',open);
+        if(b)b.setAttribute('aria-expanded',String(open));
+    }
+    window.toggleNav=toggleNav;
+    document.addEventListener('DOMContentLoaded',function(){
+        var menu=document.getElementById('nav-menu');
+        if(!menu)return;
+        menu.querySelectorAll('a').forEach(function(a){
+            a.addEventListener('click',function(){ menu.classList.remove('open'); var i=document.getElementById('nav-icon'); if(i)i.classList.remove('open'); });
+        });
+    });
+})();
+</script>
 </body>
 </html>

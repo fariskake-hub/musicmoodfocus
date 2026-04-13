@@ -1,894 +1,197 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Music & Emotion Analysis</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Music &amp; Emotion Analysis</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; line-height:1.6; color:#2d3748; background:#6c5ce7; margin:0; }
+        header { background:#10b981; color:white; padding:clamp(1rem,4vw,2rem) 1rem; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.1); }
+        header h1 { font-size:clamp(1.3rem,5vw,2.5rem); margin-bottom:0.4rem; font-weight:700; line-height:1.2; }
+        header p  { font-size:clamp(0.85rem,2.5vw,1.1rem); color:rgba(255,255,255,0.9); max-width:700px; margin:0 auto; padding:0 1rem; }
+        nav { background:rgba(255,255,255,0.15); }
+        nav a { color:white !important; background:rgba(255,255,255,0.1) !important; }
+        nav a:hover { background:rgba(255,255,255,0.3) !important; }
+        @media (max-width:700px) { nav a { color:white !important; background:none !important; } }
+        main { max-width:1200px; margin:0 auto; padding:clamp(14px,3vw,30px) clamp(12px,3vw,16px); display:flex; flex-direction:column; gap:clamp(14px,3vw,24px); }
+        .intro-section { background:white; padding:clamp(1rem,3vw,2.5rem); border-radius:15px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+        .intro-section h2 { color:#667eea; font-size:clamp(1.2rem,4vw,2rem); margin-bottom:0.8rem; font-weight:700; }
+        .intro-section p  { color:#4a5568; font-size:clamp(0.9rem,2.5vw,1.05rem); line-height:1.8; }
+        .song-card { background:white; border-radius:15px; box-shadow:0 2px 8px rgba(0,0,0,0.1); overflow:hidden; transition:transform 0.2s; }
+        .song-header { padding:clamp(1rem,3vw,2rem) clamp(1rem,3vw,2.5rem); color:white; }
+        .song-header h2 { font-size:clamp(1.2rem,5vw,2rem); margin-bottom:0.3rem; font-weight:700; }
+        .song-header .artist { font-size:clamp(0.9rem,3vw,1.3rem); opacity:0.9; }
+        .song-header .category { display:inline-block; background:rgba(255,255,255,0.3); padding:0.3rem 0.8rem; border-radius:20px; font-size:clamp(0.8rem,2.5vw,0.9rem); margin-top:0.6rem; font-weight:600; }
+        .relax-song    { background:linear-gradient(135deg,#8b5cf6,#7c3aed); }
+        .happy-song    { background:linear-gradient(135deg,#f59e0b,#d97706); }
+        .energized-song{ background:linear-gradient(135deg,#ef4444,#dc2626); }
+        .focus-song    { background:linear-gradient(135deg,#14b8a6,#0d9488); }
+        .song-content  { padding:clamp(1rem,3vw,2.5rem); }
+        .context-section { margin-bottom:1.2rem; padding:clamp(0.9rem,2vw,1.5rem); background:linear-gradient(135deg,#f6f8fb,#e9ecef); border-radius:10px; border-left:5px solid #667eea; }
+        .context-section h3 { color:#764ba2; font-size:clamp(1rem,3.5vw,1.5rem); margin-bottom:0.8rem; font-weight:600; }
+        .context-section ul { margin-left:1.2rem; } .context-section li { margin-bottom:0.6rem; font-size:clamp(0.88rem,2.5vw,0.97rem); line-height:1.65; color:#4a5568; }
+        .analysis-section { margin-bottom:1.2rem; }
+        .analysis-section h3 { color:#667eea; font-size:clamp(1rem,3.5vw,1.5rem); margin-bottom:0.8rem; font-weight:600; }
+        .analysis-item { background:#f7fafc; padding:clamp(0.9rem,2vw,1.5rem); margin-bottom:1rem; border-radius:10px; border-left:4px solid #764ba2; }
+        .analysis-item h4 { color:#2d3748; font-size:clamp(0.95rem,3vw,1.2rem); margin-bottom:0.6rem; font-weight:600; }
+        .analysis-item p  { color:#4a5568; font-size:clamp(0.88rem,2.5vw,0.97rem); line-height:1.7; margin-bottom:0.6rem; }
+        .lyric-quote { background:rgba(102,126,234,0.1); padding:clamp(0.7rem,2vw,1rem) clamp(0.9rem,2vw,1.5rem); border-left:4px solid #667eea; border-radius:8px; margin:0.8rem 0; font-style:italic; color:#2d3748; font-size:clamp(0.88rem,2.5vw,0.95rem); }
+        .lyric-quote strong { color:#667eea; font-style:normal; }
+        .website-fit { background:linear-gradient(135deg,#fa709a,#fee140); padding:clamp(1rem,3vw,2rem); border-radius:10px; margin-top:1rem; }
+        .website-fit h3 { color:#c53030; font-size:clamp(1rem,3.5vw,1.5rem); margin-bottom:0.8rem; font-weight:600; }
+        .website-fit p,.website-fit li { color:#2d3748; font-size:clamp(0.88rem,2.5vw,0.97rem); line-height:1.7; font-weight:500; }
+        .website-fit ul { margin-left:1.2rem; } .website-fit li { margin-bottom:0.5rem; }
+        .testimonial { background:#fff; padding:clamp(0.9rem,2vw,1.5rem); border-radius:10px; margin:0.8rem 0; border-left:4px solid #667eea; font-style:italic; color:#4a5568; font-size:clamp(0.88rem,2.5vw,0.95rem); }
+        .testimonial strong { color:#667eea; font-style:normal; display:block; margin-top:0.4rem; }
+        .glossary-link { color:#667eea; text-decoration:none; font-weight:600; border-bottom:2px dotted #667eea; }
+        .glossary-link:hover { color:#764ba2; }
+        .button-container { text-align:center; padding:clamp(14px,3vw,20px) 0; }
+        .back-button { display:inline-flex; align-items:center; justify-content:center; padding:14px 24px; background:#667eea; color:white; text-decoration:none; border-radius:30px; font-weight:600; min-height:52px; font-size:clamp(0.9rem,3vw,1rem); transition:opacity 0.2s; }
+        .back-button:active { opacity:0.82; }
+        footer { background:linear-gradient(135deg,#2d3748,#1a202c); color:white; text-align:center; padding:clamp(1rem,3vw,2rem) 1rem; margin-top:0.5rem; font-size:clamp(0.85rem,2.5vw,1rem); }
+        footer p { color:white; }
+    
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html { scroll-behavior:smooth; }
+    body { line-height:1.6; min-height:100vh; min-height:100dvh; }
+    img  { max-width:100%; display:block; }
+    input,select,textarea { font-size:16px !important; }
+    nav { position:relative; }
+    .nav-toggle { display:none; width:100%; background:none; border:none; color:#cbd5e1; font-size:1rem; font-weight:600; font-family:inherit; padding:0 20px; text-align:left; cursor:pointer; align-items:center; justify-content:space-between; min-height:52px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .nav-icon { font-size:1.1rem; transition:transform 0.25s; display:inline-block; }
+    .nav-icon.open { transform:rotate(180deg); }
+    nav ul { list-style:none; display:flex; justify-content:center; flex-wrap:wrap; padding:10px 8px; gap:4px; }
+    nav li { margin:3px 4px; }
+    nav a { color:#cbd5e1; text-decoration:none; font-weight:600; font-size:0.82rem; padding:8px 13px; border-radius:20px; background:rgba(255,255,255,0.05); display:block; transition:background 0.2s,color 0.2s; white-space:nowrap; }
+    nav a:hover { color:#a78bfa; background:rgba(167,139,250,0.15); }
+    @media (max-width:700px) {
+        .nav-toggle { display:flex; }
+        nav ul { display:none !important; flex-direction:column !important; padding:0 0 10px !important; gap:0 !important; flex-wrap:nowrap !important; }
+        nav ul.open { display:flex !important; }
+        nav li { margin:0 !important; width:100% !important; }
+        nav a { border-radius:0 !important; padding:14px 22px !important; background:none !important; font-size:0.95rem !important; white-space:normal !important; border-bottom:1px solid rgba(255,255,255,0.05) !important; min-height:52px; display:flex !important; align-items:center; }
+        nav a:active { background:rgba(167,139,250,0.12) !important; color:#a78bfa !important; }
+    }
+    @media (hover:none) and (pointer:coarse) {
+        .card:hover,.section:hover,article:hover,.term-card:hover,.theory-card:hover,.song-card:hover,.process-item:hover,.genre-effects:hover,.key-point:hover,.comparison-card:hover,.intro-section:hover,.brain-section:hover,.mechanisms-section:hover,.science-box:hover,form:hover,.part2:hover,#moods > div:hover,#reflection li:hover,.question-box:hover { transform:none !important; }
+        .flip-card:hover .flip-card-inner { transform:none !important; }
+        .flip-card:active .flip-card-inner { transform:rotateY(180deg); }
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            line-height: 1.6;
-            color: #2d3748;
-            background-color: #6c5ce7;
-        }
-
-        header {
-            background: #10b981;
-            color: white;
-            padding: 2rem 0rem;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        header p {
-            font-size: 1.1rem;
-            color: rgba(255, 255, 255, 0.9);
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 0 1rem;
-        }
-
-        nav {
-            background-color: rgba(255, 255, 255, 0.15);
-            padding: 1rem 0;
-        }
-
-        nav ul {
-            list-style: none;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        nav li {
-            margin: 0.5rem 1rem;
-        }
-
-        nav a {
-            color: white;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 0.5rem 1rem;
-            border-radius: 20px;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        nav a:hover {
-            background-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-2px);
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 2rem auto;
-            padding: 0 1rem;
-        }
-
-        .intro-section {
-            background: white;
-            padding: 2.5rem;
-            border-radius: 15px;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .intro-section h2 {
-            color: #667eea;
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-
-        .intro-section p {
-            color: #4a5568;
-            font-size: 1.05rem;
-            line-height: 1.8;
-        }
-
-        .song-card {
-            background: white;
-            margin: 2rem 0;
-            padding: 0;
-            border-radius: 15px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .song-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .button-container {
-            text-align: center;
-            margin-top: 0px;
-        }
-        .back-button {
-            display: inline-block;
-            padding: 0.8rem 1.5rem;
-            background-color: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 30px;
-            font-weight: 600;
-            transition: background-color 0.2s ease, transform 0.2s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-            cursor: pointer;
-        }
-
-        .back-button:hover {
-            background-color: #764ba2;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .back-button:active {
-            transform: translateY(-1px);
-        }
-
-        .song-header {
-            padding: 2rem 2.5rem;
-            color: white;
-            position: relative;
-        }
-
-        .song-header h2 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            font-weight: 700;
-        }
-
-        .song-header .artist {
-            font-size: 1.3rem;
-            opacity: 0.9;
-            font-weight: 500;
-        }
-
-        .song-header .category {
-            display: inline-block;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 0.4rem 1rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            margin-top: 0.8rem;
-            font-weight: 600;
-        }
-
-        /* Song-specific header colors */
-        .relax-song {
-            background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
-        }
-
-        .happy-song {
-            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-        }
-
-        .energized-song {
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        }
-
-        .focus-song {
-            background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);
-        }
-
-        .song-content {
-            padding: 2.5rem;
-        }
-
-        .context-section {
-            margin-bottom: 2rem;
-            padding: 1.5rem;
-            background: linear-gradient(135deg, #f6f8fb 0%, #e9ecef 100%);
-            border-radius: 10px;
-            border-left: 5px solid #667eea;
-        }
-
-        .context-section h3 {
-            color: #764ba2;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-
-        .context-section ul {
-            margin-left: 1.5rem;
-            color: #4a5568;
-        }
-
-        .context-section li {
-            margin-bottom: 0.8rem;
-            line-height: 1.7;
-        }
-
-        .analysis-section {
-            margin-bottom: 2rem;
-        }
-
-        .analysis-section h3 {
-            color: #667eea;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-
-        .analysis-item {
-            background: #f7fafc;
-            padding: 1.5rem;
-            margin-bottom: 1.2rem;
-            border-radius: 10px;
-            border-left: 4px solid #764ba2;
-        }
-
-        .analysis-item h4 {
-            color: #2d3748;
-            font-size: 1.2rem;
-            margin-bottom: 0.8rem;
-            font-weight: 600;
-        }
-
-        .analysis-item p {
-            color: #4a5568;
-            line-height: 1.7;
-            margin-bottom: 0.8rem;
-        }
-
-        .lyric-quote {
-            background: rgba(102, 126, 234, 0.1);
-            padding: 1rem 1.5rem;
-            border-left: 4px solid #667eea;
-            border-radius: 8px;
-            margin: 1rem 0;
-            font-style: italic;
-            color: #2d3748;
-        }
-
-        .lyric-quote strong {
-            color: #667eea;
-            font-style: normal;
-        }
-
-        .website-fit {
-            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
-            padding: 2rem;
-            border-radius: 10px;
-            margin-top: 2rem;
-        }
-
-        .website-fit h3 {
-            color: #c53030;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-        }
-
-        .website-fit p {
-            color: #2d3748;
-            line-height: 1.7;
-            font-weight: 500;
-        }
-
-        .website-fit ul {
-            margin-left: 1.5rem;
-            margin-top: 1rem;
-        }
-
-        .website-fit li {
-            color: #2d3748;
-            margin-bottom: 0.6rem;
-            font-weight: 500;
-        }
-
-        .testimonial {
-            background: #fff;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin: 1rem 0;
-            border-left: 4px solid #667eea;
-            font-style: italic;
-            color: #4a5568;
-        }
-
-        .testimonial strong {
-            color: #667eea;
-            font-style: normal;
-            display: block;
-            margin-top: 0.5rem;
-        }
-
-        .glossary-link {
-            color: #667eea;
-            text-decoration: none;
-            font-weight: 600;
-            border-bottom: 2px dotted #667eea;
-            transition: color 0.2s ease, border-color 0.2s ease;
-            cursor: help;
-        }
-
-        .glossary-link:hover {
-            color: #764ba2;
-            border-bottom-color: #764ba2;
-        }
-
-        html {
-            scroll-behavior: auto;
-        }
-
-        footer {
-            background: linear-gradient(135deg, #2d3748, #1a202c);
-            color: white;
-            text-align: center;
-            padding: 2rem;
-            margin-top: 2rem;
-        }
-
-        footer p {
-            color: white;
-            font-size: 1rem;
-        }
-
-        /* Mobile Styles */
-        @media (max-width: 768px) {
-            header {
-                padding: 1.5rem 1rem;
-            }
-
-            header h1 {
-                font-size: 1.8rem;
-                line-height: 1.3;
-            }
-
-            header p {
-                font-size: 1rem;
-            }
-
-            nav {
-                padding: 0.8rem 0;
-            }
-
-            nav ul {
-                flex-direction: column;
-                align-items: center;
-                gap: 0.3rem;
-            }
-
-            nav li {
-                margin: 0.3rem 0;
-                width: 90%;
-                text-align: center;
-            }
-
-            nav a {
-                display: block;
-                width: 100%;
-                padding: 0.8rem 1rem;
-                min-height: 44px;
-            }
-
-            main {
-                margin: 1rem auto;
-                padding: 0 0.8rem;
-            }
-
-            .intro-section {
-                padding: 1.5rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .intro-section h2 {
-                font-size: 1.6rem;
-            }
-
-            .intro-section p {
-                font-size: 1rem;
-            }
-
-            .song-card {
-                margin: 1.5rem 0;
-            }
-
-            .song-header {
-                padding: 1.5rem;
-            }
-
-            .song-header h2 {
-                font-size: 1.6rem;
-            }
-
-            .song-header .artist {
-                font-size: 1.1rem;
-            }
-
-            .song-header .category {
-                font-size: 0.85rem;
-                padding: 0.3rem 0.8rem;
-            }
-
-            .song-content {
-                padding: 1.5rem;
-            }
-
-            .context-section {
-                padding: 1.2rem;
-                margin-bottom: 1.5rem;
-            }
-
-            .context-section h3 {
-                font-size: 1.3rem;
-            }
-
-            .context-section ul {
-                margin-left: 1.2rem;
-            }
-
-            .context-section li {
-                font-size: 0.95rem;
-            }
-
-            .analysis-section h3 {
-                font-size: 1.3rem;
-            }
-
-            .analysis-item {
-                padding: 1.2rem;
-            }
-
-            .analysis-item h4 {
-                font-size: 1.1rem;
-            }
-
-            .analysis-item p {
-                font-size: 0.95rem;
-            }
-
-            .lyric-quote {
-                padding: 0.8rem 1.2rem;
-                font-size: 0.95rem;
-            }
-
-            .website-fit {
-                padding: 1.5rem;
-            }
-
-            .website-fit h3 {
-                font-size: 1.3rem;
-            }
-
-            .website-fit p, .website-fit li {
-                font-size: 0.95rem;
-            }
-
-            .testimonial {
-                padding: 1.2rem;
-                font-size: 0.95rem;
-            }
-
-            footer {
-                padding: 1.5rem 1rem;
-            }
-
-            footer p {
-                font-size: 0.9rem;
-            }
-        }
-
-        /* Small Mobile Styles */
-        @media (max-width: 480px) {
-            header h1 {
-                font-size: 1.5rem;
-            }
-
-            .intro-section {
-                padding: 1.2rem;
-            }
-
-            .intro-section h2 {
-                font-size: 1.4rem;
-            }
-
-            .song-header {
-                padding: 1.2rem;
-            }
-
-            .song-header h2 {
-                font-size: 1.4rem;
-            }
-
-            .song-content {
-                padding: 1.2rem;
-            }
-
-            .context-section {
-                padding: 1rem;
-            }
-
-            .context-section h3,
-            .analysis-section h3,
-            .website-fit h3 {
-                font-size: 1.2rem;
-            }
-
-            .analysis-item {
-                padding: 1rem;
-            }
-        }
-
-        /* Touch device optimizations */
-        @media (hover: none) and (pointer: coarse) {
-            nav a:active {
-                background-color: rgba(255, 255, 255, 0.3);
-            }
-
-            .song-card:hover {
-                transform: none;
-            }
-        }
     </style>
 </head>
-
 <body>
-
-    <!-- Header and Navigation -->
-    <header>
-        <h1>Music & Emotion Analysis</h1>
-        <p>Deep dive into how specific songs evoke emotions through <a href="glossary.html#tempo" class="glossary-link" title="View in Glossary">tempo</a>, <a href="glossary.html#harmony" class="glossary-link" title="View in Glossary">harmony</a>, <a href="glossary.html#instrumentation" class="glossary-link" title="View in Glossary">instrumentation</a>, and lyrics</p>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
-                <li><a href="moodandfocus.html">Mood and Focus</a></li>
-                <li><a href="playlists.html">Playlists</a></li>
-                <li><a href="musicandemotionanalysis.html">Music and Emotion Analysis</a></li>
-                <li><a href="glossary.html">Glossary</a></li>
-                <li><a href="index.html#feedback">Feedback</a></li>
-            </ul>
-        </nav>
-    </header>
-
-    <!-- Main Content -->
-    <main>
-
-        <!-- Introduction -->
-        <div class="intro-section">
-            <h2>Understanding Music Through Analysis</h2>
-            <p>
-                This page examines five influential songs across different genres to demonstrate how musical elements—tempo, harmony, instrumentation, and lyrics—combine to create specific emotional responses. Each analysis supports the scientific principles discussed throughout this website and shows how different types of music serve different purposes in our lives.
-            </p>
-        </div>
-
-        <!-- Someone Like You -->
-        <article class="song-card">
-            <div class="song-header relax-song">
-                <h2>Someone Like You</h2>
-                <div class="artist">by Adele</div>
-                <span class="category">RELAX</span>
-            </div>
-            <div class="song-content">
-                <div class="context-section">
-                    <h3>Context & Background</h3>
-                    <ul>
-                        <li>Written by Adele and Dan Wilson with a simple piano arrangement coinciding with ballads</li>
-                        <li>Global success reaching number one charts in multiple countries</li>
-                        <li>Won Grammy Award for Best Pop Solo Performance in 2012</li>
-                        <li>First piano ballad to enter the Billboard Hot 100</li>
-                        <li>Piano ballads have origins going back to the medieval age, reflecting romantic themes</li>
-                        <li>The ballad-like structure and piano create a haunting resonance that maintains control over the music's emotional nature</li>
-                    </ul>
-                </div>
-
-                <div class="analysis-section">
-                    <h3>Musical Analysis</h3>
-                    
-                    <div class="analysis-item">
-                        <h4>Tempo & Atmosphere</h4>
-                        <p>The song has a slow tempo which creates a calm atmosphere that supports self-contemplation. Research shows that slower music is associated with reflective emotions and sadness.</p>
-                        <p>Adele's vocal <a href="glossary.html#timbre" class="glossary-link" title="View in Glossary">timbre</a> is rich, warm, and deep. This conveys vulnerability.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Lyrical Content</h4>
-                        <p>The lyrics show acceptance after emotional loss, letting the listener reflect on subjective experiences.</p>
-                        <div class="lyric-quote">
-                            <strong>Lyric evidence:</strong> "Never mind, I'll find someone like you."
-                        </div>
-                        <p>This line shows that Adele adapts to the acceptance of her emotions rather than anger. This reinforces a calm, emotional tone. Studies state that lyrics referencing firsthand experiences increase emotional impact.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Piano Instrumentation</h4>
-                        <p>The song relies mostly on piano with little instrumentation. This simple tone prevents too many emotions from coinciding, allowing the emotion of the lyrics to convey that sad message.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Vocal Expression</h4>
-                        <p>Throughout the song, Adele's vocals move from soft to stronger moments, reinforcing emotional waves.</p>
-                        <div class="lyric-quote">
-                            <strong>Lyric evidence:</strong> "Sometimes it lasts in love, but sometimes it hurts instead."
-                        </div>
-                        <p>These lyrics refer to emotional pain without any aggression, which gives the sadness a reflective tone. Neuroscience shows that expressive vocals increase emotional connection and listener empathy.</p>
-                    </div>
-                </div>
-
-                <div class="website-fit">
-                    <h3>Why This Song Fits the Website's Purpose</h3>
-                    <ul>
-                        <li>Fits the <strong>Relax</strong> category because it regulates emotions rather than stimulating them with its simple yet calming melody and instrumentation</li>
-                        <li>Strong lyrical content makes it not ideal for studying or focusing, demonstrating how lyrics and <a href="glossary.html#instrumentation" class="glossary-link" title="View in Glossary">instrumental</a> music are completely different for tasks</li>
-                        <li>Aligns with research showing that lyrics increase emotional engagement but reduce task focus</li>
-                    </ul>
-                </div>
-            </div>
-        </article>
-
-        <!-- Happy -->
-        <article class="song-card">
-            <div class="song-header happy-song">
-                <h2>Happy</h2>
-                <div class="artist">by Pharrell Williams</div>
-                <span class="category">HAPPY & ENERGIZED</span>
-            </div>
-            <div class="song-content">
-                <div class="context-section">
-                    <h3>Context & Background</h3>
-                    <ul>
-                        <li>Released in 2013 as part of the soundtrack for Despicable Me 2</li>
-                        <li>Worldwide success reaching number one in twenty countries</li>
-                        <li>Earned an Academy Award nomination for Best Original Song</li>
-                        <li>Pop song with fast tempo and strong <a href="glossary.html#rhythm" class="glossary-link" title="View in Glossary">rhythm</a></li>
-                        <li>Pop music is designed to create positive emotional response with repetition, rhyme, and simple melodies</li>
-                        <li>Uses energetic instruments and cheerful lyrics to evoke joy and motivation</li>
-                    </ul>
-                </div>
-
-                <div class="analysis-section">
-                    <h3>Musical Analysis</h3>
-                    
-                    <div class="analysis-item">
-                        <h4>Tempo & Energy</h4>
-                        <p>The song uses a fast tempo and steady groove which increases energy level. Music psychology shows that tempo influences emotional response, with faster <a href="glossary.html#tempo" class="glossary-link" title="View in Glossary">tempos</a> linked to positive emotions. Studies show that faster music is associated with happiness and excitement.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4><a href="glossary.html#major-key" class="glossary-link" title="View in Glossary">Major Key</a> & Harmony</h4>
-                        <p>Happy is written in a major key which is perceived as joyful. Major <a href="glossary.html#harmony" class="glossary-link" title="View in Glossary">harmonies</a> reduce emotional tension and promote a positive mood across many different genres. Studies show that <a href="glossary.html#mode" class="glossary-link" title="View in Glossary">major mode</a> music is consistently associated with optimism.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Lyrics & Emotional Meaning</h4>
-                        <p>The lyrics focus on freedom and joy, encouraging listeners to feel engaged and positive throughout the song.</p>
-                        <div class="lyric-quote">
-                            <strong>Lyric evidence:</strong> "Because I'm happy, clap along if you feel like a room without a roof."
-                        </div>
-                        <p>These lyrics invite physical participation and express joy, reinforcing happiness with rhythm. Research shows that positive lyrical messages can improve mood and motivation.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Repetition & Structure</h4>
-                        <p>The repetitive chorus makes the song easy to remember. Repetition increases emotional impact in music and encourages listener involvement. Music studies show that repetition increases enjoyment and emotional engagement in upbeat music.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Vocal Energy</h4>
-                        <p>Pharrell's light and energetic tone contributes to how uplifting and joyful the song is. Vocal energy avoids emotional changes which maintains a positive emotional state throughout the song.</p>
-                    </div>
-                </div>
-
-                <div class="website-fit">
-                    <h3>Why This Song Fits the Website's Purpose</h3>
-                    <ul>
-                        <li>Fits the <strong>Happy and Energized</strong> categories because it increases emotional engagement and promotes positive mood</li>
-                        <li>Fast tempo and encouraging lyrics make it suitable for activities like exercising or increasing motivation</li>
-                        <li>Strong lyrical presence and rhythm means it isn't meant for studying, supporting how the website shows the difference between emotional music and focus music</li>
-                        <li>Aligns with research showing that lyrical music can improve mood but can distract from tasks requiring thinking</li>
-                    </ul>
-                </div>
-            </div>
-        </article>
-
-        <!-- Don't Stop Me Now -->
-        <article class="song-card">
-            <div class="song-header energized-song">
-                <h2>Don't Stop Me Now</h2>
-                <div class="artist">by Queen</div>
-                <span class="category">HAPPY & ENERGIZED</span>
-            </div>
-            <div class="song-content">
-                <div class="context-section">
-                    <h3>Context & Background</h3>
-                    <ul>
-                        <li>Rock song written by Freddie Mercury and performed by Queen</li>
-                        <li>Released in 1978 on the album Jazz</li>
-                        <li>Later became one of Queen's most popular and well-known songs</li>
-                        <li>Categorized as Rock with fast tempo, piano-driven rhythm, and electric guitar</li>
-                        <li>Rock music emerged in the mid-20th century and is associated with energy and emotional intensity</li>
-                        <li>Strong rhythm and expressive vocals make it effective at evoking excitement</li>
-                    </ul>
-                </div>
-
-                <div class="analysis-section">
-                    <h3>Musical Analysis</h3>
-                    
-                    <div class="analysis-item">
-                        <h4>Fast Tempo & Driving Rhythm</h4>
-                        <p>The song has a fast tempo which increases arousal and excitement. Research shows that fast-paced music is strongly associated with motivation and physical energy. Studies in music psychology indicate that fast-tempo music increases positive emotional response and physical engagement.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Major Key & Upbeat Harmony</h4>
-                        <p>Similar to Happy, Don't Stop Me Now is written in a major key which is associated with optimistic emotions. The <a href="glossary.html#harmony" class="glossary-link" title="View in Glossary">harmonic</a> structure avoids tension which keeps the mood light and celebratory. Studies show that major key music is perceived as happier across many cultures.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Lyrics & Emotional Meaning</h4>
-                        <p>The lyrics focus on enjoyment and living in the moment.</p>
-                        <div class="lyric-quote">
-                            <strong>Lyric evidence:</strong> "I'm having such a good time, I'm having a ball."
-                        </div>
-                        <p>These lyrics express joy, reinforcing the song's happy emotional tone. Psychological studies show that lyrics with positive connotation increase listeners' motivation and mood.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Instrumentation & Rock Style</h4>
-                        <p>The combination of drums, bass, piano, and electric guitar creates an energetic sound. Rock instrumentation emphasizes volume which helps sustain the feeling of excitement and happiness.</p>
-                    </div>
-                </div>
-
-                <div class="website-fit">
-                    <h3>Why This Song Fits the Website's Purpose</h3>
-                    <ul>
-                        <li>Fits the <strong>Happy and Energized</strong> categories because of its fast tempo, major key, and joyful lyrics</li>
-                        <li>Suitable for activities like boosting motivation and exercising</li>
-                        <li>Strong rhythm and lyrical presence means it isn't ideal for studying or focusing on cognitive tasks, supporting the distinction of focus music and mood-based music</li>
-                        <li>Aligns with research showing that energetic, lyrical music improves mood but can reduce concentration for tasks needing thinking</li>
-                    </ul>
-                    <div class="testimonial">
-                        "Rock music's fast tempo and strong rhythm make it especially effective for increasing energy and positive mood."
-                        <strong>— American Psychological Association</strong>
-                    </div>
-                </div>
-            </div>
-        </article>
-
-        <!-- Time -->
-        <article class="song-card">
-            <div class="song-header relax-song">
-                <h2>Time</h2>
-                <div class="artist">by Hans Zimmer</div>
-                <span class="category">RELAX / REFLECTIVE</span>
-            </div>
-            <div class="song-content">
-                <div class="context-section">
-                    <h3>Context & Background</h3>
-                    <ul>
-                        <li>Instrumental film score composed for the 2010 movie Inception</li>
-                        <li>One of Zimmer's most recognizable works, used in wide variety of media and films</li>
-                        <li>Unlike pop or rock music, film scores are composed to support emotion without using lyrics</li>
-                        <li>Belongs to the cinematic/orchestral genre, focusing on atmosphere buildup and emotional depth</li>
-                        <li>Film score music originated as a way to guide audience emotions without distracting from images or dialogue</li>
-                        <li>Orchestral film music focuses on gradual emotional development rather than immediate excitement or sadness</li>
-                    </ul>
-                </div>
-
-                <div class="analysis-section">
-                    <h3>Musical Analysis</h3>
-                    
-                    <div class="analysis-item">
-                        <h4>Gradual Build-Up</h4>
-                        <p>The song begins slowly and gradually builds up over time. This slow progression allows the listener to feel emotional anticipation without immediate changes. Research shows that gradual music pieces create emotional depth rather than immediate happiness or sadness.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Instrumental Nature (No Lyrics)</h4>
-                        <p>Time contains no lyrics. This prevents language processing and allows the listener to focus on emotional thinking instead of verbal, lyrical meaning. This makes the emotion feel changed and personal. Research shows that instrumental music encourages emotional reflection without cognitive overload.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Orchestral Instrumentation</h4>
-                        <p>The song uses piano, strings, and layered orchestrated textures. Strings are commonly related to emotional intensity, while the piano adds intimacy. Studies show that string instruments are strongly linked to emotional expression and tension.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Repetition & Emotional Build-Up</h4>
-                        <p>A repeating piano motif runs throughout the song while layers are gradually added. This repetition creates continuity and emotional weight, not including other emotions like sadness and excitement. Music studies suggest that repetition strengthens emotional focus.</p>
-                    </div>
-                </div>
-
-                <div class="website-fit">
-                    <h3>Why This Song Fits the Website's Purpose</h3>
-                    <ul>
-                        <li>Fits the <strong>Relax/Reflective</strong> category rather than emotional or focus-neutral categories</li>
-                        <li>Demonstrates how music can evoke deep emotional engagement without lyrics</li>
-                        <li>Not ideal for studying due to its emotional build-up, but effective for emotional reflection and cinematic immersion</li>
-                        <li>Supports the website's goal of showing that different structures evoke different emotional responses</li>
-                    </ul>
-                </div>
-            </div>
-        </article>
-
-        <!-- Clair de Lune -->
-        <article class="song-card">
-            <div class="song-header focus-song">
-                <h2>Clair de Lune</h2>
-                <div class="artist">by Claude Debussy</div>
-                <span class="category">FOCUS</span>
-            </div>
-            <div class="song-content">
-                <div class="context-section">
-                    <h3>Context & Background</h3>
-                    <ul>
-                        <li>Piano composition written by Claude Debussy, published in 1905 as part of Suite bergamasque</li>
-                        <li>One of the most famous and recognizable classical works worldwide</li>
-                        <li>Used frequently in films, advertisements, and study playlists</li>
-                        <li>Debussy was a leading composer of Impressionist music</li>
-                        <li>Impressionist music focuses on atmosphere, subtle emotion, and <a href="glossary.html#texture" class="glossary-link" title="View in Glossary">texture</a> rather than dramatic storytelling</li>
-                        <li>Avoids sharp differences and creates flowing, continuous sound suitable for sustained cognitive activities</li>
-                        <li>Fully instrumental and harmonically smooth, allowing listeners to remain mentally engaged without cognitive overload</li>
-                    </ul>
-                </div>
-
-                <div class="analysis-section">
-                    <h3>Musical Analysis</h3>
-                    
-                    <div class="analysis-item">
-                        <h4>Tempo & Structure</h4>
-                        <p>The piece has a moderate, steady tempo with gradual changes. Studies show that music with slow to moderate tempos and predictable phrasing supports concentration and reduces distraction.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Absence of Lyrics</h4>
-                        <p>The absence of lyrics in Clair de Lune prevents verbal processing from competing with thinking tasks. Studies show that lyrics activate language processing regions of the brain which reduces task efficiency.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Piano Instrument Impact</h4>
-                        <p>The piano produces a clear, controlled tone moving away from harsh frequencies. The gentle rise and fall of the melody maintain mental engagement without pulling emotional attention away from work. Unlike orchestral music like Time, the emotional expression remains non-narrative and simple, which supports focus.</p>
-                    </div>
-
-                    <div class="analysis-item">
-                        <h4>Listener Response</h4>
-                        <p>Clair de Lune is included in many "Focus" and "Deep Work" playlists. Students use music like this while studying or writing.</p>
-                        <div class="testimonial">
-                            "Clair de Lune helps me stay focused because it keeps my mind calm without distracting me."
-                            <strong>— Spotify user review</strong>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="website-fit">
-                    <h3>Why This Song Fits the Website's Purpose</h3>
-                    <ul>
-                        <li>Fits the <strong>Focus</strong> category because it balances emotional warmth with cognitive neutral thinking</li>
-                        <li>Unlike relaxing ballads like Someone Like You or intense orchestral pieces like Time, it does not encourage emotional reflection</li>
-                        <li>Absence of lyrics and smooth harmonic progression make it suitable for studying and working</li>
-                        <li>Demonstrates the difference of instrumental music from lyrical music in its effect on productivity and focus</li>
-                    </ul>
-                </div>
-            </div>
-        </article>
-    </main>
-
-    <div class="button-container">
-        <a href="index.html" class="back-button">Back to Home</a>
+<header>
+    <h1>Music &amp; Emotion Analysis</h1>
+    <p>Deep dive into how specific songs evoke emotions through tempo, harmony, instrumentation, and lyrics</p>
+</header>
+<nav>
+    <button class="nav-toggle" id="nav-toggle" onclick="toggleNav()" aria-expanded="false" aria-label="Open navigation">
+        Menu <span class="nav-icon" id="nav-icon">&#9662;</span>
+    </button>
+    <ul id="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
+        <li><a href="moodandfocus.html">Mood &amp; Focus</a></li>
+        <li><a href="musicandemotionanalysis.html">Emotion Analysis</a></li>
+        <li><a href="playlists.html">Playlists</a></li>
+        <li><a href="glossary.html">Glossary</a></li>
+        <li><a href="moodmatcher.html">&#127925; Mood Matcher</a></li>
+        <li><a href="focustimer.html">&#9200; Focus Timer</a></li>
+        <li><a href="index.html#feedback">Feedback</a></li>
+    </ul>
+</nav>
+<main>
+    <div class="intro-section">
+        <h2>Understanding Music Through Analysis</h2>
+        <p>This page examines five influential songs across different genres to demonstrate how musical elements combine to create specific emotional responses. Each analysis supports the scientific principles discussed throughout this website.</p>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <p>
-            MYP Personal Project 2025–2026 | Created by Faris Alakeel
-        </p>
-    </footer>
+    <article class="song-card">
+        <div class="song-header relax-song"><h2>Someone Like You</h2><div class="artist">by Adele</div><span class="category">RELAX</span></div>
+        <div class="song-content">
+            <div class="context-section"><h3>Context &amp; Background</h3><ul><li>Written by Adele and Dan Wilson with a simple piano arrangement</li><li>Won Grammy Award for Best Pop Solo Performance in 2012</li><li>First piano ballad to enter the Billboard Hot 100</li><li>The ballad-like structure and piano create a haunting resonance</li></ul></div>
+            <div class="analysis-section"><h3>Musical Analysis</h3>
+                <div class="analysis-item"><h4>Tempo &amp; Atmosphere</h4><p>The slow tempo creates a calm atmosphere that supports self-contemplation. Research shows slower music is associated with reflective emotions and sadness. Adele's vocal <a href="glossary.html#timbre" class="glossary-link">timbre</a> is rich, warm, and deep — conveying vulnerability.</p></div>
+                <div class="analysis-item"><h4>Lyrical Content</h4><p>The lyrics show acceptance after emotional loss.</p><div class="lyric-quote"><strong>Lyric evidence:</strong> "Never mind, I'll find someone like you."</div><p>This shows adaptation to acceptance rather than anger — reinforcing a calm, emotional tone.</p></div>
+                <div class="analysis-item"><h4>Piano Instrumentation</h4><p>The song relies mostly on piano with little else. This simple tone prevents emotional overload, allowing the lyrics to convey their sad message without distraction.</p></div>
+            </div>
+            <div class="website-fit"><h3>Why This Song Fits the Website</h3><ul><li>Fits the <strong>Relax</strong> category — regulates emotions with a calming melody</li><li>Strong lyrical content makes it not ideal for studying, demonstrating how lyrics differ from instrumental music for tasks</li></ul></div>
+        </div>
+    </article>
+
+    <article class="song-card">
+        <div class="song-header happy-song"><h2>Happy</h2><div class="artist">by Pharrell Williams</div><span class="category">HAPPY &amp; ENERGISED</span></div>
+        <div class="song-content">
+            <div class="context-section"><h3>Context &amp; Background</h3><ul><li>Released in 2013 as part of the Despicable Me 2 soundtrack</li><li>Reached number one in twenty countries worldwide</li><li>Earned an Academy Award nomination for Best Original Song</li><li>Uses energetic instruments and cheerful lyrics to evoke joy and motivation</li></ul></div>
+            <div class="analysis-section"><h3>Musical Analysis</h3>
+                <div class="analysis-item"><h4>Tempo &amp; Energy</h4><p>Fast tempo and steady groove increase energy level. Music psychology shows faster <a href="glossary.html#tempo" class="glossary-link">tempos</a> are linked to positive emotions and happiness.</p></div>
+                <div class="analysis-item"><h4><a href="glossary.html#major-key" class="glossary-link">Major Key</a> &amp; Harmony</h4><p>Written in a major key which is perceived as joyful. Major <a href="glossary.html#harmony" class="glossary-link">harmonies</a> reduce emotional tension and promote a positive mood.</p></div>
+                <div class="analysis-item"><h4>Lyrics &amp; Emotional Meaning</h4><p>Lyrics focus on freedom and joy, encouraging listeners to feel engaged and positive.</p><div class="lyric-quote"><strong>Lyric evidence:</strong> "Because I'm happy, clap along if you feel like a room without a roof."</div></div>
+            </div>
+            <div class="website-fit"><h3>Why This Song Fits the Website</h3><ul><li>Fits the <strong>Happy and Energised</strong> categories — increases emotional engagement and promotes positive mood</li><li>Strong lyrical presence means it isn't meant for studying, supporting the difference between emotional and focus music</li></ul></div>
+        </div>
+    </article>
+
+    <article class="song-card">
+        <div class="song-header energized-song"><h2>Don't Stop Me Now</h2><div class="artist">by Queen</div><span class="category">HAPPY &amp; ENERGISED</span></div>
+        <div class="song-content">
+            <div class="context-section"><h3>Context &amp; Background</h3><ul><li>Rock song written by Freddie Mercury, released in 1978 on the album Jazz</li><li>One of Queen's most popular and well-known songs</li><li>Strong rhythm and expressive vocals make it effective at evoking excitement</li></ul></div>
+            <div class="analysis-section"><h3>Musical Analysis</h3>
+                <div class="analysis-item"><h4>Fast Tempo &amp; Driving Rhythm</h4><p>Fast tempo increases arousal and excitement. Research shows fast-paced music is strongly associated with motivation and physical energy.</p></div>
+                <div class="analysis-item"><h4>Lyrics &amp; Emotional Meaning</h4><div class="lyric-quote"><strong>Lyric evidence:</strong> "I'm having such a good time, I'm having a ball."</div><p>These lyrics express pure joy, reinforcing the song's happy emotional tone.</p></div>
+                <div class="analysis-item"><h4>Instrumentation &amp; Rock Style</h4><p>The combination of drums, bass, piano, and electric guitar creates an energetic sound that helps sustain excitement.</p></div>
+            </div>
+            <div class="website-fit"><h3>Why This Song Fits the Website</h3><ul><li>Fits the <strong>Happy and Energised</strong> categories because of its fast tempo, major key, and joyful lyrics</li><li>Strong rhythm and lyrical presence means it isn't ideal for studying or focusing</li></ul><div class="testimonial">"Rock music's fast tempo and strong rhythm make it especially effective for increasing energy and positive mood."<strong>— American Psychological Association</strong></div></div>
+        </div>
+    </article>
+
+    <article class="song-card">
+        <div class="song-header relax-song"><h2>Time</h2><div class="artist">by Hans Zimmer</div><span class="category">RELAX / REFLECTIVE</span></div>
+        <div class="song-content">
+            <div class="context-section"><h3>Context &amp; Background</h3><ul><li>Instrumental film score composed for the 2010 movie Inception</li><li>One of Zimmer's most recognisable works, used in wide variety of media</li><li>Focuses on atmosphere buildup and emotional depth without lyrics</li></ul></div>
+            <div class="analysis-section"><h3>Musical Analysis</h3>
+                <div class="analysis-item"><h4>Gradual Build-Up</h4><p>The song begins slowly and builds over time, allowing the listener to feel emotional anticipation. Research shows gradual pieces create emotional depth rather than immediate happiness or sadness.</p></div>
+                <div class="analysis-item"><h4>Instrumental (No Lyrics)</h4><p>No lyrics prevents language processing, allowing the listener to focus on emotional thinking. Research shows instrumental music encourages emotional reflection without cognitive overload.</p></div>
+                <div class="analysis-item"><h4>Orchestral Instrumentation</h4><p>Piano, strings, and layered orchestrated textures. Strings are strongly linked to emotional expression and tension.</p></div>
+            </div>
+            <div class="website-fit"><h3>Why This Song Fits the Website</h3><ul><li>Fits the <strong>Relax/Reflective</strong> category — demonstrates how music evokes deep emotion without lyrics</li><li>Not ideal for studying due to its emotional build-up, but effective for emotional reflection</li></ul></div>
+        </div>
+    </article>
+
+    <article class="song-card">
+        <div class="song-header focus-song"><h2>Clair de Lune</h2><div class="artist">by Claude Debussy</div><span class="category">FOCUS</span></div>
+        <div class="song-content">
+            <div class="context-section"><h3>Context &amp; Background</h3><ul><li>Piano composition published in 1905 as part of Suite bergamasque</li><li>One of the most famous classical works worldwide</li><li>Used frequently in study playlists — fully instrumental and harmonically smooth</li></ul></div>
+            <div class="analysis-section"><h3>Musical Analysis</h3>
+                <div class="analysis-item"><h4>Tempo &amp; Structure</h4><p>Moderate, steady tempo with gradual changes. Studies show music with slow to moderate tempos and predictable phrasing supports concentration and reduces distraction.</p></div>
+                <div class="analysis-item"><h4>Absence of Lyrics</h4><p>No lyrics means verbal processing doesn't compete with thinking tasks. Studies show lyrics activate language regions of the brain which reduces task efficiency.</p></div>
+                <div class="analysis-item"><h4>Listener Response</h4><p>Clair de Lune is included in many "Focus" and "Deep Work" playlists. Students use music like this while studying or writing.</p><div class="testimonial">"Clair de Lune helps me stay focused because it keeps my mind calm without distracting me."<strong>— Spotify user review</strong></div></div>
+            </div>
+            <div class="website-fit"><h3>Why This Song Fits the Website</h3><ul><li>Fits the <strong>Focus</strong> category — balances emotional warmth with cognitive neutral thinking</li><li>Absence of lyrics and smooth harmonic progression make it suitable for studying</li><li>Demonstrates the difference of instrumental music from lyrical music in its effect on productivity</li></ul></div>
+        </div>
+    </article>
+
+    <div class="button-container"><a href="index.html" class="back-button">&#8592; Back to Home</a></div>
+</main>
+<footer><p>MYP Personal Project 2025&#8211;2026 | Created by Faris Alakeel</p></footer>
+<script>
+(function(){
+    function toggleNav(){
+        var m=document.getElementById('nav-menu'),i=document.getElementById('nav-icon'),b=document.getElementById('nav-toggle');
+        if(!m)return;
+        var open=m.classList.toggle('open');
+        if(i)i.classList.toggle('open',open);
+        if(b)b.setAttribute('aria-expanded',String(open));
+    }
+    window.toggleNav=toggleNav;
+    document.addEventListener('DOMContentLoaded',function(){
+        var menu=document.getElementById('nav-menu');
+        if(!menu)return;
+        menu.querySelectorAll('a').forEach(function(a){
+            a.addEventListener('click',function(){menu.classList.remove('open');var i=document.getElementById('nav-icon');if(i)i.classList.remove('open');});
+        });
+    });
+})();
+</script>
 </body>
 </html>

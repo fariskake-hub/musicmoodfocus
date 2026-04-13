@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Focus Timer</title>
+    <style>
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,#0f2027,#203a43,#2c5364); color:#d1fae5; margin:0; }
+        header { background:linear-gradient(135deg,#14b8a6,#0d9488); padding:clamp(1rem,4vw,2.5rem) 1rem; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.3); }
+        header h1 { color:white; font-size:clamp(1.5rem,5vw,2.2rem); font-weight:700; text-shadow:1px 1px 4px rgba(0,0,0,0.3); }
+        header p  { color:rgba(255,255,255,0.82); font-size:clamp(0.85rem,3vw,1rem); margin-top:6px; }
+        nav { background:rgba(15,23,42,0.98); }
+        .container { max-width:620px; margin:0 auto; padding:clamp(16px,3vw,30px) clamp(12px,3vw,20px) clamp(30px,5vw,56px); display:flex; flex-direction:column; gap:clamp(14px,3vw,18px); }
+        .card { background:rgba(30,58,50,0.97); border-radius:18px; padding:clamp(18px,4vw,32px); box-shadow:0 8px 28px rgba(0,0,0,0.35); }
+        .card-label { font-size:0.72rem; text-transform:uppercase; letter-spacing:0.09em; color:#5eead4; margin-bottom:12px; font-weight:700; }
+        .phase-label { font-size:clamp(0.9rem,3.5vw,1rem); font-weight:700; margin-bottom:4px; }
+        .phase-focus { color:#a78bfa; } .phase-break { color:#34d399; }
+        .clock { font-size:clamp(3.5rem,16vw,5.5rem); font-weight:700; color:white; letter-spacing:-2px; line-height:1; margin:8px 0 4px; font-variant-numeric:tabular-nums; }
+        .session-info { font-size:0.82rem; color:#5eead4; margin-bottom:14px; }
+        .prog-bar { height:5px; background:rgba(255,255,255,0.1); border-radius:3px; margin-bottom:20px; overflow:hidden; }
+        .prog-fill { height:100%; border-radius:3px; background:#7F77DD; transition:width 0.6s linear; }
+        .prog-fill.break-fill { background:#34d399; }
+        .controls { display:flex; gap:12px; margin-bottom:18px; }
+        .btn { border:1.5px solid rgba(255,255,255,0.18); border-radius:12px; padding:14px 16px; font-size:clamp(0.9rem,3.5vw,1rem); font-family:inherit; cursor:pointer; background:transparent; color:#d1fae5; font-weight:700; min-height:52px; transition:background 0.15s,transform 0.1s; flex:1; }
+        .btn:active { transform:scale(0.97); }
+        .btn.focus-start { background:#7F77DD; border-color:#7F77DD; color:white; flex:2; }
+        .btn.focus-start:active { background:#534AB7; }
+        .btn.break-start { background:#1D9E75; border-color:#1D9E75; color:white; flex:2; }
+        .btn.break-start:active { background:#0F6E56; }
+        .btn.reset-btn { flex:1; }
+        .session-pips { display:flex; gap:10px; align-items:center; }
+        .pip { width:13px; height:13px; border-radius:50%; background:rgba(255,255,255,0.12); transition:background 0.3s; flex-shrink:0; }
+        .pip.done { background:#7F77DD; }
+        .pips-label { font-size:0.78rem; color:#5eead4; margin-left:4px; }
+        .genre-dot { width:12px; height:12px; border-radius:50%; flex-shrink:0; }
+        .music-genre { display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+        .genre-name { font-size:clamp(1.1rem,4.5vw,1.4rem); font-weight:700; color:white; line-height:1.2; }
+        .genre-why { font-size:clamp(0.85rem,3vw,0.95rem); color:#99f6e4; line-height:1.65; margin-bottom:16px; }
+        .tip-box { background:rgba(0,0,0,0.22); border-radius:12px; padding:14px 16px; font-size:clamp(0.82rem,3vw,0.9rem); color:#a7f3d0; line-height:1.6; border-left:3px solid #14b8a6; }
+        .phase-banner { display:none; background:rgba(127,119,221,0.15); border:1.5px solid rgba(127,119,221,0.35); border-radius:12px; padding:14px 18px; font-size:clamp(0.88rem,3.5vw,0.97rem); color:#c4b5fd; text-align:center; font-weight:600; }
+        .phase-banner.break-banner { background:rgba(52,211,153,0.1); border-color:rgba(52,211,153,0.3); color:#6ee7b7; }
+        .button-container { text-align:center; }
+        .back-button { display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#14b8a6,#0d9488); color:white; padding:15px 36px; border-radius:12px; text-decoration:none; font-weight:700; font-size:clamp(0.9rem,3vw,1rem); min-height:52px; transition:opacity 0.2s; }
+        .back-button:active { opacity:0.82; }
+    
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html { scroll-behavior:smooth; } body { line-height:1.6; min-height:100vh; min-height:100dvh; }
+    img { max-width:100%; display:block; } input,select,textarea { font-size:16px !important; }
+    nav { position:relative; }
+    .nav-toggle { display:none; width:100%; background:none; border:none; color:#cbd5e1; font-size:1rem; font-weight:600; font-family:inherit; padding:0 20px; text-align:left; cursor:pointer; align-items:center; justify-content:space-between; min-height:52px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .nav-icon { font-size:1.1rem; transition:transform 0.25s; display:inline-block; }
+    .nav-icon.open { transform:rotate(180deg); }
+    nav ul { list-style:none; display:flex; justify-content:center; flex-wrap:wrap; padding:10px 8px; gap:4px; }
+    nav li { margin:3px 4px; }
+    nav a { color:#cbd5e1; text-decoration:none; font-weight:600; font-size:0.82rem; padding:8px 13px; border-radius:20px; background:rgba(255,255,255,0.05); display:block; transition:background 0.2s,color 0.2s; white-space:nowrap; }
+    nav a:hover { color:#a78bfa; background:rgba(167,139,250,0.15); }
+    @media (max-width:700px) {
+        .nav-toggle { display:flex; }
+        nav ul { display:none !important; flex-direction:column !important; padding:0 0 10px !important; gap:0 !important; flex-wrap:nowrap !important; }
+        nav ul.open { display:flex !important; }
+        nav li { margin:0 !important; width:100% !important; }
+        nav a { border-radius:0 !important; padding:14px 22px !important; background:none !important; font-size:0.95rem !important; white-space:normal !important; border-bottom:1px solid rgba(255,255,255,0.05) !important; min-height:52px; display:flex !important; align-items:center; }
+        nav a:active { background:rgba(167,139,250,0.12) !important; color:#a78bfa !important; }
+    }
+
+    </style>
+</head>
+<body>
+<header>
+    <h1>&#9200; Focus Timer</h1>
+    <p>Work in focused sessions with the right music</p>
+</header>
+<nav>
+    <button class="nav-toggle" id="nav-toggle" onclick="toggleNav()" aria-expanded="false" aria-label="Open navigation">
+        Menu <span class="nav-icon" id="nav-icon">&#9662;</span>
+    </button>
+    <ul id="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
+        <li><a href="moodandfocus.html">Mood &amp; Focus</a></li>
+        <li><a href="musicandemotionanalysis.html">Emotion Analysis</a></li>
+        <li><a href="playlists.html">Playlists</a></li>
+        <li><a href="glossary.html">Glossary</a></li>
+        <li><a href="moodmatcher.html">&#127925; Mood Matcher</a></li>
+        <li><a href="focustimer.html">&#9200; Focus Timer</a></li>
+        <li><a href="index.html#feedback">Feedback</a></li>
+    </ul>
+</nav>
+<div class="container">
+    <div class="card">
+        <div class="card-label">Session timer</div>
+        <div class="phase-label phase-focus" id="phase-label">Focus session</div>
+        <div class="clock" id="clock">25:00</div>
+        <div class="session-info" id="session-info">Session 1 of 4</div>
+        <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:100%"></div></div>
+        <div class="controls">
+            <button class="btn focus-start" id="start-btn" onclick="toggleTimer()">Start</button>
+            <button class="btn reset-btn" onclick="resetTimer()">Reset</button>
+        </div>
+        <div class="session-pips" id="pips-row">
+            <div class="session-pips" id="pips"></div>
+            <span class="pips-label" id="pips-label">0 of 4 sessions done</span>
+        </div>
+    </div>
+    <div class="phase-banner" id="phase-banner"></div>
+    <div class="card">
+        <div class="card-label">Music pairing</div>
+        <div class="music-genre">
+            <div class="genre-dot" id="genre-dot" style="background:#7F77DD"></div>
+            <div class="genre-name" id="genre-name">Lo-fi / Instrumental</div>
+        </div>
+        <div class="genre-why" id="genre-why">Predictable rhythms without lyrics keep your verbal brain free for deep work.</div>
+        <div class="tip-box" id="tip">Keep volume below 70 dB — loud music increases cognitive load during complex tasks.</div>
+    </div>
+    <div class="button-container"><a href="index.html" class="back-button">&#8592; Back to Home</a></div>
+</div>
+<script>
+var FOCUS=25*60,BREAK=5*60,TOTAL=4;
+var phaseData={
+    focus:{label:'Focus session',labelClass:'phase-label phase-focus',duration:FOCUS,genre:'Lo-fi / Instrumental',dotColor:'#7F77DD',why:'Predictable rhythms without lyrics keep your verbal brain free for deep work.',tip:'Keep volume below 70 dB — loud music increases cognitive load during complex tasks.',fillClass:'prog-fill',btnClass:'btn focus-start',banner:'Session complete! Take a short break.'},
+    break:{label:'Short break',labelClass:'phase-label phase-break',duration:BREAK,genre:'Jazz / Indie Folk',dotColor:'#34d399',why:'Gentle, mood-lifting music helps your brain recover and recharge between sessions.',tip:'Step away from your desk if you can — movement during breaks boosts the next focus session.',fillClass:'prog-fill break-fill',btnClass:'btn break-start',banner:'Break over — time to focus again!'}
+};
+var phase='focus',timeLeft=FOCUS,totalTime=FOCUS,interval=null,running=false,session=1,done=0;
+function pad(n){return n<10?'0'+n:''+n;}
+function renderClock(){document.getElementById('clock').textContent=pad(Math.floor(timeLeft/60))+':'+pad(timeLeft%60);document.getElementById('prog-fill').style.width=Math.round((timeLeft/totalTime)*100)+'%';}
+function renderPhase(){
+    var p=phaseData[phase];
+    var ph=document.getElementById('phase-label');ph.textContent=p.label;ph.className=p.labelClass;
+    document.getElementById('genre-name').textContent=p.genre;
+    document.getElementById('genre-dot').style.background=p.dotColor;
+    document.getElementById('genre-why').textContent=p.why;
+    document.getElementById('tip').textContent=p.tip;
+    document.getElementById('prog-fill').className=p.fillClass;
+    document.getElementById('start-btn').className=p.btnClass;
+    document.getElementById('start-btn').textContent='Start';
+    document.getElementById('session-info').textContent=phase==='focus'?'Session '+session+' of '+TOTAL:'Break — session '+Math.min(session+1,TOTAL)+' up next';
+    var phtml='';for(var i=0;i<TOTAL;i++){phtml+='<div class="pip'+(i<done?' done':'')+'"></div>';}
+    document.getElementById('pips').innerHTML=phtml;
+    document.getElementById('pips-label').textContent=done+' of '+TOTAL+' sessions done';
+}
+function showBanner(text,extra){var b=document.getElementById('phase-banner');b.textContent=text;b.className='phase-banner'+(extra?' '+extra:'');b.style.display='block';setTimeout(function(){b.style.display='none';},4000);}
+function toggleTimer(){
+    if(running){clearInterval(interval);running=false;document.getElementById('start-btn').textContent='Resume';}
+    else{
+        running=true;document.getElementById('start-btn').textContent='Pause';
+        interval=setInterval(function(){
+            timeLeft--;
+            if(timeLeft<=0){clearInterval(interval);running=false;onPhaseEnd();}
+            else{renderClock();}
+        },1000);
+    }
+}
+function onPhaseEnd(){
+    if(phase==='focus'){done++;showBanner(phaseData.focus.banner,'');phase='break';timeLeft=BREAK;totalTime=BREAK;}
+    else{showBanner(phaseData.break.banner,'break-banner');if(session<TOTAL)session++;phase='focus';timeLeft=FOCUS;totalTime=FOCUS;}
+    renderClock();renderPhase();
+}
+function resetTimer(){
+    clearInterval(interval);running=false;phase='focus';session=1;done=0;timeLeft=FOCUS;totalTime=FOCUS;
+    document.getElementById('phase-banner').style.display='none';
+    renderClock();renderPhase();
+}
+renderClock();renderPhase();
+</script>
+<script>
+(function(){
+    function toggleNav(){var m=document.getElementById('nav-menu'),i=document.getElementById('nav-icon'),b=document.getElementById('nav-toggle');if(!m)return;var open=m.classList.toggle('open');if(i)i.classList.toggle('open',open);if(b)b.setAttribute('aria-expanded',String(open));}
+    window.toggleNav=toggleNav;
+    document.addEventListener('DOMContentLoaded',function(){var menu=document.getElementById('nav-menu');if(!menu)return;menu.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){menu.classList.remove('open');var i=document.getElementById('nav-icon');if(i)i.classList.remove('open');});});});
+})();
+</script>
+</body>
+</html>

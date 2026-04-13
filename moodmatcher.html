@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Mood Matcher</title>
+    <style>
+        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,#0f172a,#1e293b,#334155); color:#e2e8f0; margin:0; }
+        header { background:linear-gradient(135deg,#3b82f6,#8b5cf6); padding:clamp(1rem,4vw,2.5rem) 1rem; text-align:center; box-shadow:0 4px 16px rgba(0,0,0,0.3); }
+        header h1 { color:white; font-size:clamp(1.5rem,5vw,2.2rem); font-weight:700; text-shadow:1px 1px 4px rgba(0,0,0,0.3); }
+        header p  { color:rgba(255,255,255,0.82); font-size:clamp(0.85rem,3vw,1rem); margin-top:6px; }
+        nav { background:rgba(15,23,42,0.98); }
+        .container { max-width:620px; margin:0 auto; padding:clamp(16px,3vw,30px) clamp(12px,3vw,20px) clamp(30px,5vw,56px); }
+        .card { background:rgba(30,41,59,0.97); border-radius:18px; padding:clamp(18px,4vw,36px); box-shadow:0 8px 30px rgba(0,0,0,0.38); }
+        .card-title { font-size:clamp(1.1rem,4vw,1.4rem); font-weight:700; color:#93c5fd; margin-bottom:4px; }
+        .card-sub   { font-size:clamp(0.85rem,3vw,0.95rem); color:#94a3b8; margin-bottom:22px; line-height:1.5; }
+        .progress-bar { display:flex; gap:8px; margin-bottom:20px; }
+        .prog-dot { height:5px; flex:1; border-radius:3px; background:rgba(255,255,255,0.1); transition:background 0.35s; }
+        .prog-dot.done   { background:#7F77DD; }
+        .prog-dot.active { background:#AFA9EC; }
+        .question { font-size:clamp(1rem,4vw,1.15rem); font-weight:600; color:#e2e8f0; margin-bottom:16px; line-height:1.45; }
+        .options { display:flex; flex-direction:column; gap:11px; }
+        .opt-btn { background:rgba(255,255,255,0.05); border:1.5px solid rgba(255,255,255,0.1); border-radius:12px; padding:15px 18px; cursor:pointer; font-size:clamp(0.9rem,3.5vw,1rem); font-family:inherit; color:#e2e8f0; text-align:left; line-height:1.4; width:100%; min-height:54px; transition:border-color 0.15s,background 0.15s,transform 0.1s; }
+        .opt-btn:active { transform:scale(0.98); border-color:#7F77DD; background:rgba(127,119,221,0.15); }
+        .opt-btn.selected { border-color:#7F77DD; background:rgba(127,119,221,0.22); color:#c4b5fd; }
+        .result { display:none; }
+        .result-label { font-size:0.75rem; text-transform:uppercase; letter-spacing:0.09em; color:#64748b; margin-bottom:8px; }
+        .result-mood  { font-size:clamp(1.5rem,7vw,2.1rem); font-weight:700; margin-bottom:10px; line-height:1.2; }
+        .result-divider { height:1px; background:rgba(255,255,255,0.07); margin:14px 0; }
+        .result-why   { font-size:clamp(0.88rem,3.2vw,0.97rem); color:#94a3b8; line-height:1.75; margin-bottom:16px; }
+        .genre-pills  { display:flex; gap:9px; flex-wrap:wrap; margin-bottom:18px; }
+        .pill { font-size:0.82rem; padding:7px 16px; border-radius:20px; font-weight:700; }
+        .result-link { display:flex; align-items:center; justify-content:center; margin-bottom:12px; color:#93c5fd; font-size:clamp(0.9rem,3.5vw,1rem); font-weight:700; text-decoration:none; padding:15px 18px; background:rgba(147,197,253,0.07); border:1.5px solid rgba(147,197,253,0.25); border-radius:12px; text-align:center; min-height:52px; transition:background 0.2s; }
+        .result-link:active { background:rgba(147,197,253,0.16); }
+        .restart-btn { background:transparent; border:1.5px solid rgba(255,255,255,0.16); border-radius:12px; padding:14px 20px; font-size:clamp(0.9rem,3.5vw,1rem); font-family:inherit; cursor:pointer; color:#94a3b8; width:100%; min-height:52px; font-weight:600; transition:background 0.2s,color 0.2s; }
+        .restart-btn:active { background:rgba(255,255,255,0.06); color:#e2e8f0; }
+        .button-container { text-align:center; margin-top:18px; }
+        .back-button { display:inline-flex; align-items:center; justify-content:center; background:linear-gradient(135deg,#3b82f6,#2563eb); color:white; padding:15px 36px; border-radius:12px; text-decoration:none; font-weight:700; font-size:clamp(0.9rem,3vw,1rem); min-height:52px; transition:opacity 0.2s; }
+        .back-button:active { opacity:0.82; }
+        @keyframes fadeSlide { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+        .animate-in { animation:fadeSlide 0.22s ease forwards; }
+    
+    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+    html { scroll-behavior:smooth; } body { line-height:1.6; min-height:100vh; min-height:100dvh; }
+    img { max-width:100%; display:block; } input,select,textarea { font-size:16px !important; }
+    nav { position:relative; }
+    .nav-toggle { display:none; width:100%; background:none; border:none; color:#cbd5e1; font-size:1rem; font-weight:600; font-family:inherit; padding:0 20px; text-align:left; cursor:pointer; align-items:center; justify-content:space-between; min-height:52px; border-bottom:1px solid rgba(255,255,255,0.07); }
+    .nav-icon { font-size:1.1rem; transition:transform 0.25s; display:inline-block; }
+    .nav-icon.open { transform:rotate(180deg); }
+    nav ul { list-style:none; display:flex; justify-content:center; flex-wrap:wrap; padding:10px 8px; gap:4px; }
+    nav li { margin:3px 4px; }
+    nav a { color:#cbd5e1; text-decoration:none; font-weight:600; font-size:0.82rem; padding:8px 13px; border-radius:20px; background:rgba(255,255,255,0.05); display:block; transition:background 0.2s,color 0.2s; white-space:nowrap; }
+    nav a:hover { color:#a78bfa; background:rgba(167,139,250,0.15); }
+    @media (max-width:700px) {
+        .nav-toggle { display:flex; }
+        nav ul { display:none !important; flex-direction:column !important; padding:0 0 10px !important; gap:0 !important; flex-wrap:nowrap !important; }
+        nav ul.open { display:flex !important; }
+        nav li { margin:0 !important; width:100% !important; }
+        nav a { border-radius:0 !important; padding:14px 22px !important; background:none !important; font-size:0.95rem !important; white-space:normal !important; border-bottom:1px solid rgba(255,255,255,0.05) !important; min-height:52px; display:flex !important; align-items:center; }
+        nav a:active { background:rgba(167,139,250,0.12) !important; color:#a78bfa !important; }
+    }
+
+    </style>
+</head>
+<body>
+<header>
+    <h1>&#127925; Mood Matcher</h1>
+    <p>Find your perfect music mood in 3 taps</p>
+</header>
+<nav>
+    <button class="nav-toggle" id="nav-toggle" onclick="toggleNav()" aria-expanded="false" aria-label="Open navigation">
+        Menu <span class="nav-icon" id="nav-icon">&#9662;</span>
+    </button>
+    <ul id="nav-menu">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
+        <li><a href="moodandfocus.html">Mood &amp; Focus</a></li>
+        <li><a href="musicandemotionanalysis.html">Emotion Analysis</a></li>
+        <li><a href="playlists.html">Playlists</a></li>
+        <li><a href="glossary.html">Glossary</a></li>
+        <li><a href="moodmatcher.html">&#127925; Mood Matcher</a></li>
+        <li><a href="focustimer.html">&#9200; Focus Timer</a></li>
+        <li><a href="index.html#feedback">Feedback</a></li>
+    </ul>
+</nav>
+<div class="container">
+    <div class="card">
+        <div class="card-title">Find your music mood</div>
+        <div class="card-sub">Answer 3 quick questions to get your perfect music recommendation</div>
+        <div id="quiz">
+            <div class="progress-bar" id="progress"></div>
+            <div class="question" id="question-text"></div>
+            <div class="options" id="options-grid"></div>
+        </div>
+        <div class="result" id="result"></div>
+    </div>
+    <div class="button-container"><a href="index.html" class="back-button">&#8592; Back to Home</a></div>
+</div>
+<script>
+var questions=[
+    {text:"How's your energy right now?",options:[{label:"&#128564;  Drained — I need to recharge",tags:["relax"]},{label:"&#128524;  Low but steady",tags:["relax","focus"]},{label:"&#128578;  Moderate — getting things done",tags:["focus","happy"]},{label:"&#9889;  High — ready to go all out",tags:["motivated"]}]},
+    {text:"What are you about to do?",options:[{label:"&#128218;  Study or do deep work",tags:["focus"]},{label:"&#128170;  Work out or be active",tags:["motivated"]},{label:"&#128516;  Hang out or socialise",tags:["happy"]},{label:"&#128716;  Wind down or go to sleep",tags:["relax"]}]},
+    {text:"What's your current mood vibe?",options:[{label:"&#127807;  Calm and peaceful",tags:["relax"]},{label:"&#127919;  Focused and driven",tags:["focus"]},{label:"&#9728;  Light and joyful",tags:["happy"]},{label:"&#128293;  Intense and fired up",tags:["motivated"]}]}
+];
+var results={
+    focus:{mood:"&#127919; Focus mode",why:"Your answers point to a state where you need mental clarity without distraction. Instrumental and lo-fi music will keep your brain in the zone without pulling attention away from your work.",genres:["Lo-fi","Classical","Ambient"],pillStyles:["background:#EEEDFE;color:#3C3489","background:#EAF3DE;color:#27500A","background:#E6F1FB;color:#0C447C"],page:"focus.html"},
+    motivated:{mood:"&#128293; Motivation boost",why:"You're in a high-energy, action-ready state. Fast tempos and powerful beats will keep adrenaline high and push you through tough moments.",genres:["Rock","Hip-hop","EDM"],pillStyles:["background:#FCEBEB;color:#791F1F","background:#FAEEDA;color:#633806","background:#EEEDFE;color:#3C3489"],page:"motivated.html"},
+    happy:{mood:"&#128522; Happy vibes",why:"You're in a light, social, or upbeat headspace. Upbeat music with positive energy will amplify those good feelings and keep the mood lifted.",genres:["Pop","Jazz","Funk"],pillStyles:["background:#FAEEDA;color:#633806","background:#EAF3DE;color:#27500A","background:#FBEAF0;color:#72243E"],page:"happy.html"},
+    relax:{mood:"&#128524; Relax & unwind",why:"Your body and mind are signalling that they need rest. Slow, gentle music will lower your cortisol levels and help your nervous system shift into a calm state.",genres:["Classical","Indie/Folk","Jazz"],pillStyles:["background:#E6F1FB;color:#0C447C","background:#EAF3DE;color:#27500A","background:#FBEAF0;color:#72243E"],page:"relax.html"}
+};
+var current=0,scores={focus:0,motivated:0,happy:0,relax:0},picking=false;
+function renderProgress(){
+    document.getElementById('progress').innerHTML=questions.map(function(_,i){var c='prog-dot';if(i<current)c+=' done';else if(i===current)c+=' active';return'<div class="'+c+'"></div>';}).join('');
+}
+function renderQuestion(){
+    picking=false;renderProgress();
+    var q=questions[current];
+    var qEl=document.getElementById('question-text');
+    qEl.textContent=q.text;qEl.classList.remove('animate-in');void qEl.offsetWidth;qEl.classList.add('animate-in');
+    document.getElementById('options-grid').innerHTML=q.options.map(function(opt,i){return'<button class="opt-btn" onclick="pick('+i+')">'+opt.label+'</button>';}).join('');
+}
+function pick(i){
+    if(picking)return;picking=true;
+    document.querySelectorAll('.opt-btn').forEach(function(el,j){el.classList.toggle('selected',j===i);});
+    setTimeout(function(){
+        questions[current].options[i].tags.forEach(function(t){scores[t]++;});
+        current++;
+        if(current<questions.length){renderQuestion();}else{showResult();}
+    },320);
+}
+function showResult(){
+    document.getElementById('quiz').style.display='none';
+    var entries=Object.entries(scores);entries.sort(function(a,b){return b[1]-a[1];});
+    var winner=entries[0][0];var r=results[winner];
+    var el=document.getElementById('result');el.style.display='block';el.classList.remove('animate-in');void el.offsetWidth;el.classList.add('animate-in');
+    el.innerHTML='<div class="result-label">Your music mood match</div><div class="result-mood">'+r.mood+'</div><div class="result-divider"></div><div class="result-why">'+r.why+'</div><div class="genre-pills">'+r.genres.map(function(g,i){return'<span class="pill" style="'+r.pillStyles[i]+'">'+g+'</span>';}).join('')+'</div><a class="result-link" href="'+r.page+'">Go to your playlist page &#8594;</a><button class="restart-btn" onclick="restart()">&#8617; Try again</button>';
+}
+function restart(){current=0;scores={focus:0,motivated:0,happy:0,relax:0};document.getElementById('result').style.display='none';document.getElementById('quiz').style.display='block';renderQuestion();}
+renderQuestion();
+</script>
+<script>
+(function(){
+    function toggleNav(){var m=document.getElementById('nav-menu'),i=document.getElementById('nav-icon'),b=document.getElementById('nav-toggle');if(!m)return;var open=m.classList.toggle('open');if(i)i.classList.toggle('open',open);if(b)b.setAttribute('aria-expanded',String(open));}
+    window.toggleNav=toggleNav;
+    document.addEventListener('DOMContentLoaded',function(){var menu=document.getElementById('nav-menu');if(!menu)return;menu.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){menu.classList.remove('open');var i=document.getElementById('nav-icon');if(i)i.classList.remove('open');});});});
+})();
+</script>
+</body>
+</html>
