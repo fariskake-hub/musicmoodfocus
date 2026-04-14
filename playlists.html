@@ -1,582 +1,283 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
-    <title>Music Playlist Generator</title>
-    <style>
-        body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,#0f172a,#1e293b,#312e81); color:#e5e7eb; margin:0; }
-        nav { background:rgba(30,41,59,0.95); margin-bottom:0; }
-        #playlist-hero { text-align:center; padding:clamp(2rem,6vw,5rem) clamp(1rem,3vw,2rem) clamp(1.5rem,4vw,4rem); background:linear-gradient(135deg,#6366f1,#8b5cf6); border-radius:clamp(12px,3vw,24px); margin:clamp(12px,3vw,3rem) clamp(12px,3vw,1rem); box-shadow:0 8px 20px rgba(99,102,241,0.3); }
-        #playlist-hero h1 { font-size:clamp(1.5rem,6vw,3rem); margin-bottom:0.8rem; color:#fff; font-weight:700; text-shadow:2px 2px 4px rgba(0,0,0,0.3); }
-        #playlist-hero p  { max-width:700px; margin:0 auto; font-size:clamp(0.9rem,2.5vw,1.1rem); color:rgba(255,255,255,0.9); }
-        section { max-width:1000px; margin:clamp(14px,3vw,4rem) auto; padding:0 clamp(12px,3vw,1.5rem); }
-        section h2 { font-size:clamp(1.2rem,4vw,2.2rem); margin-bottom:clamp(12px,2vw,2rem); color:#a78bfa; font-weight:700; }
-        form { background:rgba(30,41,59,0.95); padding:clamp(1rem,3vw,2rem); border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.2); }
-        label { display:block; margin-bottom:0.4rem; color:#cbd5e1; font-weight:600; font-size:clamp(0.9rem,2.5vw,1.05rem); }
-        select { width:100%; padding:clamp(0.7rem,2vw,0.8rem); margin-bottom:clamp(10px,2vw,1.5rem); background:rgba(15,23,42,0.95); color:#e5e7eb; border:2px solid #334155; border-radius:8px; cursor:pointer; transition:all 0.3s; font-family:inherit; -webkit-appearance:none; font-size:16px; }
-        select:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
-        .gen-btn { display:block; width:100%; margin:clamp(12px,2vw,2rem) 0 0; padding:clamp(0.9rem,2vw,1rem); font-size:clamp(0.95rem,3vw,1.1rem); border:none; border-radius:999px; background:linear-gradient(135deg,#6366f1,#4f46e5); color:#fff; cursor:pointer; transition:all 0.3s; font-weight:600; min-height:54px; font-family:inherit; }
-        .gen-btn:active { opacity:0.85; transform:scale(0.98); }
-        #result-box { background:rgba(30,41,59,0.95); padding:clamp(1rem,3vw,2rem); border-radius:16px; min-height:80px; margin-top:clamp(12px,2vw,2rem); box-shadow:0 8px 20px rgba(0,0,0,0.2); }
-        #result-box.empty { display:flex; align-items:center; justify-content:center; color:#64748b; font-style:italic; font-size:clamp(0.9rem,2.5vw,1rem); text-align:center; padding:2rem; }
-        .playlist-header { font-size:clamp(1.2rem,4vw,1.8rem); margin-bottom:0.8rem; color:#c4b5fd; font-weight:700; }
-        .playlist-description { color:#cbd5e1; margin-bottom:1.2rem; padding-bottom:1.2rem; border-bottom:2px solid #334155; line-height:1.7; font-size:clamp(0.88rem,2.5vw,0.97rem); }
-        .song-list { margin-top:1rem; }
-        .song-item { background:rgba(15,23,42,0.95); padding:clamp(0.9rem,2vw,1rem) clamp(0.9rem,2vw,1.2rem); margin-bottom:0.7rem; border-radius:8px; border-left:4px solid #6366f1; transition:all 0.3s; cursor:pointer; display:flex; align-items:center; gap:clamp(0.7rem,2vw,1rem); min-height:68px; user-select:none; -webkit-user-select:none; }
-        .song-item:active { background:rgba(99,102,241,0.15); }
-        .song-item.playing { border-left-color:#10b981; background:rgba(16,185,129,0.1); }
-        .song-item.loading { border-left-color:#f59e0b; }
-        .song-artwork-placeholder { width:48px; height:48px; border-radius:6px; flex-shrink:0; background:rgba(99,102,241,0.2); display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
-        .song-artwork { width:48px; height:48px; border-radius:6px; object-fit:cover; flex-shrink:0; display:none; }
-        .song-info { flex:1; min-width:0; }
-        .song-title { font-weight:600; color:#f8fafc; font-size:clamp(0.9rem,3vw,1.05rem); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        .song-artist { color:#94a3b8; font-size:clamp(0.8rem,2.5vw,0.88rem); margin-top:0.15rem; }
-        .song-preview-hint { font-size:clamp(0.75rem,2vw,0.8rem); margin-top:0.2rem; color:#6366f1; font-style:italic; }
-        .song-play-icon { font-size:1.4rem; flex-shrink:0; min-width:28px; text-align:center; }
-        .waveform { display:flex; align-items:flex-end; gap:2px; height:18px; flex-shrink:0; }
-        .waveform span { width:3px; background:#10b981; border-radius:2px; animation:wave 0.8s ease-in-out infinite; }
-        .waveform span:nth-child(1){ animation-delay:0s;height:6px; } .waveform span:nth-child(2){ animation-delay:.15s;height:12px; } .waveform span:nth-child(3){ animation-delay:.3s;height:18px; } .waveform span:nth-child(4){ animation-delay:.45s;height:12px; } .waveform span:nth-child(5){ animation-delay:.6s;height:6px; }
-        @keyframes wave { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(0.3)} }
-        #mini-player { position:fixed; bottom:0; left:0; right:0; background:rgba(15,23,42,0.97); border-top:2px solid #6366f1; padding:clamp(8px,2vw,12px) clamp(12px,3vw,24px); display:none; align-items:center; gap:clamp(8px,2vw,16px); z-index:999; }
-        #mini-player.visible { display:flex; }
-        #mini-player-art { width:40px; height:40px; border-radius:6px; object-fit:cover; flex-shrink:0; display:none; }
-        #mini-player-info { flex:1; min-width:0; }
-        #mini-player-title { font-weight:700; color:#f8fafc; font-size:clamp(0.82rem,2.5vw,0.95rem); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-        #mini-player-artist { color:#a78bfa; font-size:clamp(0.75rem,2vw,0.82rem); }
-        #mini-player-audio { flex:2; min-width:80px; max-width:320px; accent-color:#6366f1; }
-        #mini-player-close { background:none; border:none; color:#64748b; font-size:1.3rem; cursor:pointer; padding:4px 8px; border-radius:4px; flex-shrink:0; font-family:inherit; min-width:36px; min-height:36px; }
-        #mini-player-close:active { color:#f8fafc; background:rgba(255,255,255,0.05); }
-        .science-box { background:rgba(49,46,129,0.95); padding:clamp(1rem,2vw,1.5rem); border-radius:12px; margin-top:1.2rem; border-left:4px solid #10b981; }
-        .science-box h3 { color:#10b981; margin-bottom:0.4rem; font-weight:700; font-size:clamp(0.95rem,3vw,1.1rem); }
-        .science-box p  { color:#cbd5e1; line-height:1.8; font-size:clamp(0.88rem,2.5vw,0.97rem); }
-        .part2 { background:rgba(30,41,59,0.95); border-radius:16px; padding:clamp(1rem,3vw,1.5rem); margin-top:clamp(16px,3vw,50px); box-shadow:0 8px 20px rgba(0,0,0,0.2); }
-        .part2 h2 { color:#a78bfa; font-size:clamp(1.1rem,4vw,1.5rem); margin-bottom:0.8rem; text-align:center; }
-        .part2 p { text-align:center; color:#cbd5e1; margin-bottom:1rem; font-size:clamp(0.88rem,2.5vw,0.97rem); }
-        .stream-buttons { display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:0.7rem; }
-        .stream-btn { display:flex; align-items:center; justify-content:center; padding:clamp(0.8rem,2vw,1rem); font-size:clamp(0.9rem,2.5vw,1.1rem); border:none; border-radius:999px; background:linear-gradient(135deg,#6366f1,#4f46e5); color:#fff; cursor:pointer; transition:all 0.3s; font-weight:600; min-height:52px; text-decoration:none; font-family:inherit; }
-        .stream-btn:active { opacity:0.85; }
-        .home-btn { display:inline-flex; align-items:center; justify-content:center; margin:clamp(16px,3vw,3rem) auto; padding:14px clamp(1.5rem,4vw,2.5rem); background:linear-gradient(135deg,#6366f1,#4f46e5); color:#fff; border:none; border-radius:999px; font-size:clamp(0.9rem,3vw,1.1rem); font-weight:600; cursor:pointer; min-height:52px; font-family:inherit; text-decoration:none; }
-        .home-btn:active { opacity:0.85; }
-        .center { text-align:center; }
-        body.player-open { padding-bottom:80px; }
-        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-        html { scroll-behavior:smooth; } body { line-height:1.6; min-height:100vh; min-height:100dvh; }
-        img { max-width:100%; display:block; }
-        nav { position:relative; }
-        .nav-toggle { display:none; width:100%; background:none; border:none; color:#cbd5e1; font-size:1rem; font-weight:600; font-family:inherit; padding:0 20px; text-align:left; cursor:pointer; align-items:center; justify-content:space-between; min-height:52px; border-bottom:1px solid rgba(255,255,255,0.07); }
-        .nav-icon { font-size:1.1rem; transition:transform 0.25s; display:inline-block; }
-        .nav-icon.open { transform:rotate(180deg); }
-        nav ul { list-style:none; display:flex; justify-content:center; flex-wrap:wrap; padding:10px 8px; gap:4px; }
-        nav li { margin:3px 4px; }
-        nav a { color:#cbd5e1; text-decoration:none; font-weight:600; font-size:0.82rem; padding:8px 13px; border-radius:20px; background:rgba(255,255,255,0.05); display:block; transition:background 0.2s,color 0.2s; white-space:nowrap; }
-        nav a:hover { color:#a78bfa; background:rgba(167,139,250,0.15); }
-        @media (max-width:700px) {
-            .nav-toggle { display:flex; }
-            nav ul { display:none !important; flex-direction:column !important; padding:0 0 10px !important; gap:0 !important; flex-wrap:nowrap !important; }
-            nav ul.open { display:flex !important; }
-            nav li { margin:0 !important; width:100% !important; }
-            nav a { border-radius:0 !important; padding:14px 22px !important; background:none !important; font-size:0.95rem !important; white-space:normal !important; border-bottom:1px solid rgba(255,255,255,0.05) !important; min-height:52px; display:flex !important; align-items:center; }
-            nav a:active { background:rgba(167,139,250,0.12) !important; color:#a78bfa !important; }
-        }
-        @media (hover:none) and (pointer:coarse) {
-            .card:hover,.section:hover,article:hover,.science-box:hover,form:hover,.part2:hover { transform:none !important; }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Music Playlist Generator</title>
+
+<style>
+body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,#0f172a,#1e293b,#312e81); color:#e5e7eb; margin:0; }
+
+#playlist-hero { text-align:center; padding:3rem 1rem; background:linear-gradient(135deg,#6366f1,#8b5cf6); margin:1rem; border-radius:16px; }
+
+section { max-width:1000px; margin:2rem auto; padding:0 1rem; }
+
+form { background:#1e293b; padding:1.5rem; border-radius:16px; }
+
+label { display:block; margin-top:1rem; }
+
+select { width:100%; padding:0.7rem; margin-top:0.3rem; background:#0f172a; color:#fff; }
+
+.gen-btn { width:100%; margin-top:1.5rem; padding:1rem; border:none; border-radius:999px; background:#6366f1; color:#fff; font-size:1rem; }
+
+#result-box { background:#1e293b; padding:1.5rem; border-radius:16px; margin-top:1.5rem; min-height:80px; }
+
+.song-item {
+display:flex;
+align-items:center;
+gap:12px;
+padding:12px;
+margin:8px 0;
+background:#0f172a;
+border-left:4px solid #6366f1;
+border-radius:8px;
+cursor:pointer;
+}
+
+.song-artwork { width:50px; height:50px; border-radius:6px; display:none; }
+
+.song-play-icon { margin-left:auto; }
+
+#mini-player {
+position:fixed;
+bottom:0; left:0; right:0;
+background:#0f172a;
+padding:10px;
+display:none;
+align-items:center;
+gap:10px;
+}
+
+#mini-player.visible { display:flex; }
+
+#mini-player-art { width:40px; height:40px; border-radius:6px; }
+
+</style>
 </head>
+
 <body>
 
 <section id="playlist-hero">
-    <h1>Customised Playlists</h1>
-    <p>Answer a few questions and receive a playlist designed using real psychological research.</p>
+<h1>Custom Playlist Generator</h1>
+<p>Generate playlists using iTunes API previews</p>
 </section>
 
-<nav>
-    <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-label="Open navigation">
-        Menu <span class="nav-icon" id="nav-icon">&#9662;</span>
-    </button>
-    <ul id="nav-menu">
-        <li><a href="index.html">Home</a></li>
-        <li><a href="sciencebehindmusic.html">Science Behind Music</a></li>
-        <li><a href="moodandfocus.html">Mood &amp; Focus</a></li>
-        <li><a href="musicandemotionanalysis.html">Emotion Analysis</a></li>
-        <li><a href="playlists.html">Playlists</a></li>
-        <li><a href="glossary.html">Glossary</a></li>
-        <li><a href="moodmatcher.html">&#127925; Mood Matcher</a></li>
-        <li><a href="focustimer.html">&#9200; Focus Timer</a></li>
-        <li><a href="index.html#feedback">Feedback</a></li>
-    </ul>
-</nav>
+<section>
+<form id="playlistForm">
+<label>Goal</label>
+<select id="goal">
+<option value="focus">Focus</option>
+<option value="relax">Relax</option>
+<option value="happy">Happy</option>
+<option value="energy">Energy</option>
+</select>
 
-<section id="playlist-quiz">
-    <h2>Customise Your Playlist</h2>
-    <form id="playlistForm">
-        <label>What is your goal?</label>
-        <select id="goal">
-            <option value="focus">Focus</option>
-            <option value="relax">Relax</option>
-            <option value="happy">Feel Happy</option>
-            <option value="energy">Get Energised</option>
-        </select>
-        <label>What kind of task are you doing?</label>
-        <select id="task">
-            <option value="studying">Studying</option>
-            <option value="working">Working</option>
-            <option value="exercising">Exercising</option>
-            <option value="relaxing">Relaxing</option>
-        </select>
-        <label>Do you prefer lyrics?</label>
-        <select id="lyrics">
-            <option value="no">No lyrics (Instrumental only)</option>
-            <option value="yes">Lyrics are fine</option>
-        </select>
-        <button type="button" class="gen-btn" id="generateBtn">&#9654; Generate My Playlist</button>
-    </form>
+<label>Task</label>
+<select id="task">
+<option value="studying">Studying</option>
+<option value="working">Working</option>
+<option value="exercising">Exercising</option>
+<option value="relaxing">Relaxing</option>
+</select>
+
+<label>Lyrics</label>
+<select id="lyrics">
+<option value="no">Instrumental</option>
+<option value="yes">Lyrics OK</option>
+</select>
+
+<button type="button" class="gen-btn" id="generateBtn">▶ Generate Playlist</button>
+</form>
+
+<div id="result-box">Tap generate to see playlist</div>
 </section>
-
-<section id="playlistResults">
-    <h2>Your Recommended Playlist</h2>
-    <div id="result-box" class="empty">Tap "Generate My Playlist" to see your personalised recommendations</div>
-
-    <div class="part2">
-        <h2>Create Your Own Playlists</h2>
-        <p>Open your favourite music app and search for the songs above:</p>
-        <div class="stream-buttons">
-            <a class="stream-btn" href="https://www.spotify.com" target="_blank" rel="noopener">&#127928; Spotify</a>
-            <a class="stream-btn" href="https://www.apple.com/apple-music/" target="_blank" rel="noopener">&#127925; Apple Music</a>
-            <a class="stream-btn" href="https://music.youtube.com" target="_blank" rel="noopener">&#127916; YouTube Music</a>
-        </div>
-    </div>
-</section>
-
-<div class="center"><a class="home-btn" href="index.html">&#8592; Go Home</a></div>
 
 <div id="mini-player">
-    <img id="mini-player-art" src="" alt="artwork">
-    <div id="mini-player-info">
-        <div id="mini-player-title"></div>
-        <div id="mini-player-artist"></div>
-    </div>
-    <audio id="mini-player-audio" controls preload="none" playsinline webkit-playsinline></audio>
-    <button id="mini-player-close" aria-label="Close player">&#10005;</button>
+<img id="mini-player-art">
+<div>
+<div id="mini-player-title"></div>
+<div id="mini-player-artist"></div>
+</div>
+<audio id="mini-player-audio" controls></audio>
+<button onclick="closePlayer()">✕</button>
 </div>
 
 <script>
-/* ============================================================
-   SONG DATABASE
-   ============================================================ */
-var songDatabase = {
-    focus: {
-        instrumental: [
-            { title:"Moonlight Sonata", artist:"Beethoven", genre:"Classical" },
-            { title:"Clair de Lune", artist:"Debussy", genre:"Classical" },
-            { title:"Gymnopedie No. 1", artist:"Erik Satie", genre:"Classical" },
-            { title:"River Flows in You", artist:"Yiruma", genre:"Piano" },
-            { title:"Experience", artist:"Ludovico Einaudi", genre:"Piano" },
-            { title:"Weightless", artist:"Marconi Union", genre:"Ambient" },
-            { title:"Divenire", artist:"Ludovico Einaudi", genre:"Piano" },
-            { title:"Porcelain", artist:"Moby", genre:"Ambient" }
-        ],
-        lyrics: [
-            { title:"Lost in Yesterday", artist:"Tame Impala", genre:"Indie" },
-            { title:"Float On", artist:"Modest Mouse", genre:"Indie" },
-            { title:"Holocene", artist:"Bon Iver", genre:"Indie Folk" },
-            { title:"Electric Relaxation", artist:"A Tribe Called Quest", genre:"Hip-Hop" }
-        ]
-    },
-    relax: {
-        instrumental: [
-            { title:"Weightless", artist:"Marconi Union", genre:"Ambient" },
-            { title:"Clair de Lune", artist:"Debussy", genre:"Classical" },
-            { title:"River Flows in You", artist:"Yiruma", genre:"Piano" },
-            { title:"Gymnopedie No. 1", artist:"Erik Satie", genre:"Classical" },
-            { title:"Divenire", artist:"Ludovico Einaudi", genre:"Piano" },
-            { title:"Porcelain", artist:"Moby", genre:"Ambient" }
-        ],
-        lyrics: [
-            { title:"Banana Pancakes", artist:"Jack Johnson", genre:"Folk" },
-            { title:"Come Away With Me", artist:"Norah Jones", genre:"Jazz" },
-            { title:"Holocene", artist:"Bon Iver", genre:"Indie Folk" },
-            { title:"The Night We Met", artist:"Lord Huron", genre:"Indie Folk" },
-            { title:"To Build a Home", artist:"The Cinematic Orchestra", genre:"Ambient" }
-        ]
-    },
-    happy: {
-        instrumental: [
-            { title:"Take Five", artist:"Dave Brubeck", genre:"Jazz" },
-            { title:"Sing Sing Sing", artist:"Benny Goodman", genre:"Jazz" },
-            { title:"Jessica", artist:"The Allman Brothers Band", genre:"Rock" }
-        ],
-        lyrics: [
-            { title:"Good Life", artist:"OneRepublic", genre:"Pop" },
-            { title:"Walking on Sunshine", artist:"Katrina and The Waves", genre:"Pop" },
-            { title:"Happy", artist:"Pharrell Williams", genre:"Pop" },
-            { title:"Mr. Blue Sky", artist:"Electric Light Orchestra", genre:"Rock" },
-            { title:"September", artist:"Earth Wind and Fire", genre:"Funk" },
-            { title:"Don't Stop Me Now", artist:"Queen", genre:"Rock" },
-            { title:"Uptown Funk", artist:"Bruno Mars", genre:"Funk" }
-        ]
-    },
-    energy: {
-        instrumental: [
-            { title:"Sandstorm", artist:"Darude", genre:"EDM" },
-            { title:"Animals", artist:"Martin Garrix", genre:"EDM" },
-            { title:"Orion", artist:"Metallica", genre:"Rock" }
-        ],
-        lyrics: [
-            { title:"Till I Collapse", artist:"Eminem", genre:"Hip-Hop" },
-            { title:"Eye of the Tiger", artist:"Survivor", genre:"Rock" },
-            { title:"Thunderstruck", artist:"AC/DC", genre:"Rock" },
-            { title:"Lose Yourself", artist:"Eminem", genre:"Hip-Hop" },
-            { title:"Levels", artist:"Avicii", genre:"EDM" },
-            { title:"Can't Hold Us", artist:"Macklemore", genre:"Hip-Hop" },
-            { title:"Titanium", artist:"David Guetta", genre:"EDM" }
-        ]
-    }
+// ---------------- SONG DATA ----------------
+const songDatabase = {
+focus:{
+instrumental:[
+{title:"Clair de Lune",artist:"Debussy"},
+{title:"Experience",artist:"Ludovico Einaudi"},
+{title:"Weightless",artist:"Marconi Union"}
+],
+lyrics:[
+{title:"Holocene",artist:"Bon Iver"},
+{title:"Float On",artist:"Modest Mouse"}
+]
+},
+relax:{
+instrumental:[
+{title:"Gymnopedie No 1",artist:"Erik Satie"},
+{title:"River Flows in You",artist:"Yiruma"}
+],
+lyrics:[
+{title:"Banana Pancakes",artist:"Jack Johnson"},
+{title:"Come Away With Me",artist:"Norah Jones"}
+]
+},
+happy:{
+instrumental:[
+{title:"Take Five",artist:"Dave Brubeck"}
+],
+lyrics:[
+{title:"Happy",artist:"Pharrell Williams"},
+{title:"Mr Blue Sky",artist:"ELO"}
+]
+},
+energy:{
+instrumental:[
+{title:"Animals",artist:"Martin Garrix"}
+],
+lyrics:[
+{title:"Eye of the Tiger",artist:"Survivor"},
+{title:"Lose Yourself",artist:"Eminem"}
+]
+}
 };
 
-var moodData = {
-    focus:  { emoji:"&#127911;", title:"Focus Playlist",       desc:"This playlist avoids lyrics to reduce language interference and promote a flow state. Instrumental music blocks distractions without adding cognitive load." },
-    relax:  { emoji:"&#127754;", title:"Relaxation Playlist",  desc:"These tracks lower heart rate and cortisol levels. Classical and acoustic elements promote calmness and reduce stress and anxiety." },
-    happy:  { emoji:"&#9728;",   title:"Mood-Boost Playlist",  desc:"Upbeat tempos stimulate dopamine release. Jazz and funk trigger alpha waves associated with a calm, happy mind." },
-    energy: { emoji:"&#9889;",   title:"Energy Playlist",      desc:"Fast tempo music increases arousal and motivation. High-energy tracks boost physical performance and mental drive." }
+// ---------------- AUDIO + STATE ----------------
+let audio = document.getElementById("mini-player-audio");
+let currentEl = null;
+let cache = {};
+let unlocked = false;
+
+// unlock audio (mobile fix)
+function unlockAudio(){
+if(unlocked) return;
+unlocked = true;
+audio.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+audio.play().catch(()=>{});
+audio.pause();
+audio.src = "";
+}
+
+document.addEventListener("click", unlockAudio, {once:true});
+document.addEventListener("touchstart", unlockAudio, {once:true});
+
+// ---------------- ITUNES API ----------------
+function itunesSearch(title, artist){
+return new Promise(resolve=>{
+let cb = "cb_"+Date.now();
+window[cb]=function(data){
+delete window[cb];
+document.body.removeChild(script);
+resolve(data.results || []);
 };
 
-var scienceText = {
-    studying:   "Instrumental music is optimal for studying as it avoids verbal processing interference, allowing your brain to focus on reading and comprehension tasks.",
-    working:    "Background music creates an optimal environment for productivity by blocking distractions and promoting consistent brainwaves that improve performance.",
-    exercising: "Music with strong rhythms synchronises with physical movement, increasing motivation and endurance. Higher volume is acceptable during physical activity.",
-    relaxing:   "Low volume calming music promotes peace of mind by triggering alpha waves, lowering cortisol, and releasing dopamine for stress relief."
-};
+let script=document.createElement("script");
+script.src="https://itunes.apple.com/search?term="+
+encodeURIComponent(title+" "+artist)+
+"&entity=song&limit=5&callback="+cb;
 
-/* ============================================================
-   AUDIO STATE
-   ============================================================ */
-var previewCache  = {};   // key -> info object | null
-var prefetchQueue = {};   // key -> Promise (deduplicates in-flight requests)
-var currentItem   = null; // currently active .song-item element
-var audioEl       = document.getElementById('mini-player-audio');
-var miniPlayer    = document.getElementById('mini-player');
+script.onerror=()=>resolve([]);
+document.body.appendChild(script);
 
-/* ============================================================
-   ITUNES API  — JSONP first (works on iOS Safari, no CORS)
-                 fetch() fallback for desktop / Android
-   ============================================================ */
-function forceHttps(url) {
-    /* iTunes sometimes returns http:// preview URLs.
-       iOS Safari blocks mixed-content, so we force https://  */
-    return url ? url.replace(/^http:\/\//i, 'https://') : null;
-}
-
-function itunesJSONP(title, artist) {
-    return new Promise(function(resolve) {
-        /* Register the callback BEFORE appending the script tag so Safari
-           doesn't fire the callback before window[cb] exists */
-        var cb = 'itcb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
-        var script, timer;
-
-        function cleanup() {
-            clearTimeout(timer);
-            try { delete window[cb]; } catch(e) {}
-            if (script && script.parentNode) script.parentNode.removeChild(script);
-        }
-
-        window[cb] = function(data) {
-            cleanup();
-            resolve((data && data.results) || []);
-        };
-
-        timer = setTimeout(function() { cleanup(); resolve([]); }, 7000);
-
-        script = document.createElement('script');
-        script.onerror = function() { cleanup(); resolve([]); };
-        script.src = 'https://itunes.apple.com/search?term=' +
-            encodeURIComponent(title + ' ' + artist) +
-            '&entity=song&limit=5&media=music&country=US&callback=' + cb;
-        document.head.appendChild(script);
-    });
-}
-
-function fetchTrackInfo(title, artist) {
-    var key = title + '\x00' + artist;
-    if (previewCache.hasOwnProperty(key))  return Promise.resolve(previewCache[key]);
-    if (prefetchQueue.hasOwnProperty(key)) return prefetchQueue[key];
-
-    prefetchQueue[key] = itunesJSONP(title, artist)
-        .then(function(results) {
-            if (results.length) return results;
-            /* fetch() fallback — works on desktop & Android Chrome */
-            return fetch('https://itunes.apple.com/search?term=' +
-                encodeURIComponent(title + ' ' + artist) +
-                '&entity=song&limit=5&media=music&country=US')
-                .then(function(r) { return r.ok ? r.json() : { results:[] }; })
-                .then(function(d) { return d.results || []; })
-                .catch(function()  { return []; });
-        })
-        .then(function(results) {
-            /* Prefer a result whose title roughly matches what we searched */
-            var track = results.find(function(r) {
-                return r.previewUrl &&
-                       r.trackName &&
-                       r.trackName.toLowerCase().indexOf(title.toLowerCase().split(' ')[0]) !== -1;
-            });
-            if (!track) track = results.find(function(r) { return r.previewUrl; }) || null;
-
-            var info = null;
-            if (track) {
-                var raw = track.artworkUrl100 || track.artworkUrl60 || '';
-                info = {
-                    preview:    forceHttps(track.previewUrl),
-                    artwork:    forceHttps(raw.replace(/\d+x\d+bb/, '300x300bb') || null),
-                    trackName:  track.trackName,
-                    artistName: track.artistName
-                };
-            }
-            previewCache[key] = info;
-            delete prefetchQueue[key];
-            return info;
-        })
-        .catch(function() {
-            previewCache[key] = null;
-            delete prefetchQueue[key];
-            return null;
-        });
-
-    return prefetchQueue[key];
-}
-
-/* ============================================================
-   PRE-FETCH ON TOUCHSTART / MOUSEENTER
-   ----------------------------------------------------------
-   iOS Safari only allows audio.play() synchronously within a
-   user-gesture handler. Any await before play() breaks this.
-
-   The fix: start the iTunes network request the moment the
-   user first touches a song row (touchstart). By the time they
-   lift their finger and the click fires, fetchTrackInfo() has
-   already resolved and previewCache is populated. playSong()
-   can then set audioEl.src SYNCHRONOUSLY — keeping the audio
-   session alive — and defer play() to the oncanplay event,
-   which iOS always permits.
-   ============================================================ */
-function attachPrefetch(item) {
-    function prefetch() { fetchTrackInfo(item.dataset.title, item.dataset.artist); }
-    item.addEventListener('touchstart', prefetch, { passive: true });
-    item.addEventListener('mouseenter', prefetch);
-}
-
-/* ============================================================
-   UI HELPERS
-   ============================================================ */
-function setPlayingUI(item, on) {
-    if (!item || !document.body.contains(item)) return;
-    var icon = item.querySelector('.song-play-icon');
-    if (on) {
-        item.classList.add('playing');
-        item.classList.remove('loading');
-        if (icon) icon.innerHTML = '<div class="waveform"><span></span><span></span><span></span><span></span><span></span></div>';
-    } else {
-        item.classList.remove('playing', 'loading');
-        if (icon) icon.textContent = '\u25B6';
-    }
-}
-
-function setHint(item, text) {
-    var h = item && item.querySelector('.song-preview-hint');
-    if (h) h.textContent = text;
-}
-
-function stopCurrent() {
-    audioEl.pause();
-    if (currentItem) { setPlayingUI(currentItem, false); currentItem = null; }
-    miniPlayer.classList.remove('visible');
-    document.body.classList.remove('player-open');
-}
-
-audioEl.addEventListener('ended', stopCurrent);
-
-/* ============================================================
-   playSong  — the mobile-safe tap handler
-   ============================================================ */
-function playSong(item, title, artist) {
-    var key = title + '\x00' + artist;
-
-    /* Toggle off if already playing */
-    if (currentItem === item) { stopCurrent(); return; }
-
-    stopCurrent();
-
-    /* Show loading state */
-    item.classList.add('loading');
-    var icon = item.querySelector('.song-play-icon');
-    if (icon) icon.textContent = '\u2026';
-    currentItem = item;
-
-    function doPlay(info) {
-        if (currentItem !== item) return; /* user tapped elsewhere */
-
-        if (!info || !info.preview) {
-            item.classList.remove('loading');
-            setPlayingUI(item, false);
-            setHint(item, 'Preview not available');
-            currentItem = null;
-            return;
-        }
-
-        /* ── iOS AUDIO FIX ──────────────────────────────────────────────
-           Setting src + load() here keeps the gesture session open.
-           We then play inside oncanplay — iOS allows media-element
-           events to trigger play() even after the gesture stack unwinds.
-           ────────────────────────────────────────────────────────────── */
-        audioEl.src = info.preview;
-        audioEl.load();
-
-        function onCanPlay() {
-            audioEl.removeEventListener('canplay', onCanPlay);
-            if (currentItem !== item) return;
-            var p = audioEl.play();
-            if (p && p.catch) {
-                p.catch(function(err) {
-                    /* Still blocked (e.g. iOS low-power mode)?
-                       The native controls in the mini-player let the user tap play. */
-                    console.warn('play() blocked:', err.message);
-                    setHint(item, 'Tap play in the bar below');
-                });
-            }
-        }
-        audioEl.addEventListener('canplay', onCanPlay);
-
-        /* Artwork in the song row */
-        if (info.artwork) {
-            var artImg = item.querySelector('.song-artwork');
-            var ph     = item.querySelector('.song-artwork-placeholder');
-            if (artImg) {
-                artImg.src = info.artwork;
-                artImg.style.display = 'block';
-                if (ph) ph.style.display = 'none';
-            }
-        }
-
-        /* Mini-player */
-        var mpArt = document.getElementById('mini-player-art');
-        if (info.artwork) { mpArt.src = info.artwork; mpArt.style.display = 'block'; }
-        else              { mpArt.src = '';           mpArt.style.display = 'none';  }
-        document.getElementById('mini-player-title').textContent  = info.trackName  || title;
-        document.getElementById('mini-player-artist').textContent = info.artistName || artist;
-        miniPlayer.classList.add('visible');
-        document.body.classList.add('player-open');
-
-        setPlayingUI(item, true);
-        setHint(item, 'Playing preview\u2026');
-    }
-
-    /* If touchstart pre-fetch already resolved, doPlay runs synchronously
-       (still inside the gesture stack) — the safest path on iOS.
-       Otherwise we fall back to an async fetch; play() may need the
-       native controls as a backup on strict iOS environments.          */
-    if (previewCache.hasOwnProperty(key)) {
-        doPlay(previewCache[key]);
-    } else {
-        fetchTrackInfo(title, artist).then(doPlay);
-    }
-}
-
-/* ============================================================
-   CLOSE PLAYER
-   ============================================================ */
-function closePlayer() { stopCurrent(); }
-
-/* ============================================================
-   GENERATE PLAYLIST
-   ============================================================ */
-function generatePlaylist() {
-    var goal = document.getElementById('goal').value;
-    var task = document.getElementById('task').value;
-    var lyr  = document.getElementById('lyrics').value;
-    var rb   = document.getElementById('result-box');
-
-    closePlayer();
-    rb.classList.remove('empty');
-
-    var pool = lyr === 'no'
-        ? songDatabase[goal].instrumental
-        : songDatabase[goal].instrumental.slice(0, 3).concat(songDatabase[goal].lyrics.slice(0, 5));
-
-    /* Shuffle and pick 6 */
-    var shuffled = pool.slice().sort(function() { return 0.5 - Math.random(); }).slice(0, 6);
-    var md = moodData[goal];
-
-    var html = '<div class="playlist-header">' + md.emoji + ' ' + md.title + '</div>';
-    html += '<div class="playlist-description">' + md.desc + '</div>';
-    html += '<p style="color:#6366f1;font-size:clamp(0.82rem,2.5vw,0.9rem);margin-bottom:0.8rem;">&#127925; Tap any song to hear a 30-second preview</p>';
-    html += '<div class="song-list">';
-
-    shuffled.forEach(function(song, i) {
-        /* Encode into data attributes — safe against apostrophes and quotes */
-        var safeTitle  = song.title.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-        var safeArtist = song.artist.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
-        html += '<div class="song-item" data-title="' + safeTitle + '" data-artist="' + safeArtist + '">';
-        html += '  <div class="song-artwork-placeholder">&#127925;</div>';
-        html += '  <img class="song-artwork" src="" alt="">';
-        html += '  <div class="song-info">';
-        html += '    <div class="song-title">' + (i + 1) + '. ' + song.title + '</div>';
-        html += '    <div class="song-artist">' + song.artist + ' &middot; ' + song.genre + '</div>';
-        html += '    <div class="song-preview-hint">Tap to preview</div>';
-        html += '  </div>';
-        html += '  <div class="song-play-icon">&#9654;</div>';
-        html += '</div>';
-    });
-
-    html += '</div>';
-    html += '<div class="science-box"><h3>&#129504; Why this works for '
-         + task.charAt(0).toUpperCase() + task.slice(1)
-         + '</h3><p>' + scienceText[task] + '</p></div>';
-
-    rb.innerHTML = html;
-
-    /* Attach listeners — no inline onclick, no quote bugs */
-    rb.querySelectorAll('.song-item').forEach(function(item) {
-        attachPrefetch(item);
-        item.addEventListener('click', function() {
-            playSong(item, item.dataset.title, item.dataset.artist);
-        });
-    });
-
-    rb.scrollIntoView({ behavior:'smooth', block:'nearest' });
-}
-
-/* ============================================================
-   BUTTON + NAV WIRING  (runs after DOM is ready)
-   ============================================================ */
-document.addEventListener('DOMContentLoaded', function() {
-
-    /* Generate button */
-    document.getElementById('generateBtn').addEventListener('click', generatePlaylist);
-
-    /* Mini-player close button */
-    document.getElementById('mini-player-close').addEventListener('click', closePlayer);
-
-    /* Mobile nav toggle */
-    document.getElementById('nav-toggle').addEventListener('click', function() {
-        var menu = document.getElementById('nav-menu');
-        var icon = document.getElementById('nav-icon');
-        var btn  = document.getElementById('nav-toggle');
-        var open = menu.classList.toggle('open');
-        if (icon) icon.classList.toggle('open', open);
-        btn.setAttribute('aria-expanded', String(open));
-    });
-
-    /* Close nav when a link is tapped */
-    var navMenu = document.getElementById('nav-menu');
-    if (navMenu) {
-        navMenu.querySelectorAll('a').forEach(function(a) {
-            a.addEventListener('click', function() {
-                navMenu.classList.remove('open');
-                var icon = document.getElementById('nav-icon');
-                if (icon) icon.classList.remove('open');
-            });
-        });
-    }
+setTimeout(()=>resolve([]),5000);
 });
+}
+
+async function getPreview(title,artist){
+let key=title+artist;
+if(cache[key]) return cache[key];
+
+let results = await itunesSearch(title,artist);
+let track = results.find(r=>r.previewUrl);
+
+if(!track){
+cache[key]=null;
+return null;
+}
+
+let data={
+preview:track.previewUrl,
+art:track.artworkUrl100?.replace("100x100bb","300x300bb"),
+title:track.trackName,
+artist:track.artistName
+};
+
+cache[key]=data;
+return data;
+}
+
+// ---------------- PLAY ----------------
+async function playSong(el,title,artist){
+
+unlockAudio();
+
+if(currentEl===el){
+audio.pause();
+currentEl=null;
+document.getElementById("mini-player").classList.remove("visible");
+return;
+}
+
+if(currentEl) audio.pause();
+currentEl=el;
+
+el.querySelector(".song-play-icon").textContent="...";
+
+let info=await getPreview(title,artist);
+if(!info) return;
+
+audio.src=info.preview;
+audio.load();
+
+audio.play().catch(()=>{});
+
+document.getElementById("mini-player").classList.add("visible");
+document.getElementById("mini-player-art").src=info.art||"";
+document.getElementById("mini-player-title").textContent=info.title;
+document.getElementById("mini-player-artist").textContent=info.artist;
+}
+
+// ---------------- GENERATE ----------------
+function generatePlaylist(){
+
+let goal=document.getElementById("goal").value;
+let lyrics=document.getElementById("lyrics").value;
+
+let songs=songDatabase[goal].instrumental.slice();
+
+if(lyrics==="yes"){
+songs=songs.concat(songDatabase[goal].lyrics);
+}
+
+songs=songs.sort(()=>Math.random()-0.5).slice(0,6);
+
+let html="<h3>Your Playlist</h3>";
+
+songs.forEach(s=>{
+html+=`
+<div class="song-item" onclick="playSong(this,'${s.title}','${s.artist}')">
+<div>🎵</div>
+<div>${s.title}<br><small>${s.artist}</small></div>
+<div class="song-play-icon">▶</div>
+</div>`;
+});
+
+document.getElementById("result-box").innerHTML=html;
+}
+
+// ---------------- EVENTS ----------------
+document.getElementById("generateBtn").addEventListener("click",generatePlaylist);
+
+function closePlayer(){
+audio.pause();
+document.getElementById("mini-player").classList.remove("visible");
+currentEl=null;
+}
 </script>
+
 </body>
 </html>
