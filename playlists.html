@@ -8,44 +8,102 @@
 <style>
 body { font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif; background:linear-gradient(135deg,#0f172a,#1e293b,#312e81); color:#e5e7eb; margin:0; }
 
-#playlist-hero { text-align:center; padding:3rem 1rem; background:linear-gradient(135deg,#6366f1,#8b5cf6); margin:1rem; border-radius:16px; }
+nav { background:rgba(30,41,59,0.95); margin-bottom:0; }
 
-section { max-width:1000px; margin:2rem auto; padding:0 1rem; }
-
-form { background:#1e293b; padding:1.5rem; border-radius:16px; }
-
-label { display:block; margin-top:1rem; }
-
-select { width:100%; padding:0.7rem; margin-top:0.3rem; background:#0f172a; color:#fff; }
-
-.gen-btn { width:100%; margin-top:1.5rem; padding:1rem; border:none; border-radius:999px; background:#6366f1; color:#fff; font-size:1rem; }
-
-#result-box { background:#1e293b; padding:1.5rem; border-radius:16px; margin-top:1.5rem; min-height:80px; }
-
-.song-item {
-display:flex;
-align-items:center;
-gap:12px;
-padding:12px;
-margin:8px 0;
-background:#0f172a;
-border-left:4px solid #6366f1;
-border-radius:8px;
-cursor:pointer;
+#playlist-hero {
+text-align:center;
+padding:clamp(2rem,6vw,5rem) clamp(1rem,3vw,2rem) clamp(1.5rem,4vw,4rem);
+background:linear-gradient(135deg,#6366f1,#8b5cf6);
+border-radius:clamp(12px,3vw,24px);
+margin:clamp(12px,3vw,3rem) clamp(12px,3vw,1rem);
+box-shadow:0 8px 20px rgba(99,102,241,0.3);
 }
 
-.song-artwork { width:50px; height:50px; border-radius:6px; display:none; }
+#playlist-hero h1 { font-size:clamp(1.5rem,6vw,3rem); margin-bottom:0.8rem; color:#fff; font-weight:700; text-shadow:2px 2px 4px rgba(0,0,0,0.3); }
 
-.song-play-icon { margin-left:auto; }
+#playlist-hero p { max-width:700px; margin:0 auto; font-size:clamp(0.9rem,2.5vw,1.1rem); color:rgba(255,255,255,0.9); }
+
+section { max-width:1000px; margin:clamp(14px,3vw,4rem) auto; padding:0 clamp(12px,3vw,1.5rem); }
+
+form { background:rgba(30,41,59,0.95); padding:clamp(1rem,3vw,2rem); border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.2); }
+
+label { display:block; margin-bottom:0.4rem; color:#cbd5e1; font-weight:600; }
+
+select { width:100%; padding:0.8rem; margin-bottom:1rem; background:rgba(15,23,42,0.95); color:#e5e7eb; border:2px solid #334155; border-radius:8px; }
+
+.gen-btn {
+display:block;
+width:100%;
+margin-top:1rem;
+padding:1rem;
+font-size:1.1rem;
+border:none;
+border-radius:999px;
+background:linear-gradient(135deg,#6366f1,#4f46e5);
+color:#fff;
+cursor:pointer;
+font-weight:600;
+}
+
+#result-box {
+background:rgba(30,41,59,0.95);
+padding:2rem;
+border-radius:16px;
+min-height:80px;
+margin-top:2rem;
+}
+
+.song-item {
+background:rgba(15,23,42,0.95);
+padding:1rem;
+margin-bottom:0.7rem;
+border-radius:8px;
+border-left:4px solid #6366f1;
+cursor:pointer;
+display:flex;
+align-items:center;
+gap:1rem;
+min-height:68px;
+}
+
+.song-artwork-placeholder {
+width:48px;
+height:48px;
+border-radius:6px;
+background:rgba(99,102,241,0.2);
+display:flex;
+align-items:center;
+justify-content:center;
+}
+
+.song-artwork {
+width:48px;
+height:48px;
+border-radius:6px;
+object-fit:cover;
+display:none;
+}
+
+.song-info { flex:1; }
+
+.song-title { font-weight:600; color:#f8fafc; }
+
+.song-artist { color:#94a3b8; font-size:0.9rem; }
+
+.song-play-icon { font-size:1.3rem; }
 
 #mini-player {
 position:fixed;
-bottom:0; left:0; right:0;
-background:#0f172a;
+bottom:0;
+left:0;
+right:0;
+background:rgba(15,23,42,0.97);
+border-top:2px solid #6366f1;
 padding:10px;
 display:none;
 align-items:center;
 gap:10px;
+z-index:999;
 }
 
 #mini-player.visible { display:flex; }
@@ -58,21 +116,22 @@ gap:10px;
 <body>
 
 <section id="playlist-hero">
-<h1>Custom Playlist Generator</h1>
-<p>Generate playlists using iTunes API previews</p>
+<h1>Customised Playlists</h1>
+<p>Answer a few questions and receive a playlist designed using real psychological research.</p>
 </section>
 
-<section>
+<section id="playlist-quiz">
 <form id="playlistForm">
-<label>Goal</label>
+
+<label>What is your goal?</label>
 <select id="goal">
 <option value="focus">Focus</option>
 <option value="relax">Relax</option>
-<option value="happy">Happy</option>
-<option value="energy">Energy</option>
+<option value="happy">Feel Happy</option>
+<option value="energy">Get Energised</option>
 </select>
 
-<label>Task</label>
+<label>What kind of task are you doing?</label>
 <select id="task">
 <option value="studying">Studying</option>
 <option value="working">Working</option>
@@ -80,16 +139,19 @@ gap:10px;
 <option value="relaxing">Relaxing</option>
 </select>
 
-<label>Lyrics</label>
+<label>Do you prefer lyrics?</label>
 <select id="lyrics">
-<option value="no">Instrumental</option>
-<option value="yes">Lyrics OK</option>
+<option value="no">No lyrics</option>
+<option value="yes">Lyrics are fine</option>
 </select>
 
-<button type="button" class="gen-btn" id="generateBtn">▶ Generate Playlist</button>
+<button type="button" class="gen-btn" onclick="generatePlaylist()">▶ Generate My Playlist</button>
 </form>
+</section>
 
-<div id="result-box">Tap generate to see playlist</div>
+<section id="playlistResults">
+<h2>Your Recommended Playlist</h2>
+<div id="result-box">Tap "Generate My Playlist" to see your personalised recommendations</div>
 </section>
 
 <div id="mini-player">
@@ -103,8 +165,8 @@ gap:10px;
 </div>
 
 <script>
-// ---------------- SONG DATA ----------------
-const songDatabase = {
+
+const songDatabase={
 focus:{
 instrumental:[
 {title:"Clair de Lune",artist:"Debussy"},
@@ -146,40 +208,34 @@ lyrics:[
 }
 };
 
-// ---------------- AUDIO + STATE ----------------
-let audio = document.getElementById("mini-player-audio");
-let currentEl = null;
-let cache = {};
-let unlocked = false;
+let audio=document.getElementById("mini-player-audio");
+let currentEl=null;
+let cache={};
+let unlocked=false;
 
-// unlock audio (mobile fix)
 function unlockAudio(){
 if(unlocked) return;
-unlocked = true;
-audio.src = "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=";
+unlocked=true;
 audio.play().catch(()=>{});
 audio.pause();
-audio.src = "";
+audio.src="";
 }
 
-document.addEventListener("click", unlockAudio, {once:true});
-document.addEventListener("touchstart", unlockAudio, {once:true});
+document.addEventListener("click",unlockAudio,{once:true});
+document.addEventListener("touchstart",unlockAudio,{once:true});
 
-// ---------------- ITUNES API ----------------
-function itunesSearch(title, artist){
+// ---------- iTunes ----------
+function itunesSearch(title,artist){
 return new Promise(resolve=>{
-let cb = "cb_"+Date.now();
+let cb="cb_"+Date.now();
 window[cb]=function(data){
 delete window[cb];
-document.body.removeChild(script);
-resolve(data.results || []);
+script.remove();
+resolve(data.results||[]);
 };
 
 let script=document.createElement("script");
-script.src="https://itunes.apple.com/search?term="+
-encodeURIComponent(title+" "+artist)+
-"&entity=song&limit=5&callback="+cb;
-
+script.src="https://itunes.apple.com/search?term="+encodeURIComponent(title+" "+artist)+"&entity=song&limit=5&callback="+cb;
 script.onerror=()=>resolve([]);
 document.body.appendChild(script);
 
@@ -191,13 +247,10 @@ async function getPreview(title,artist){
 let key=title+artist;
 if(cache[key]) return cache[key];
 
-let results = await itunesSearch(title,artist);
-let track = results.find(r=>r.previewUrl);
+let results=await itunesSearch(title,artist);
+let track=results.find(r=>r.previewUrl);
 
-if(!track){
-cache[key]=null;
-return null;
-}
+if(!track){ cache[key]=null; return null; }
 
 let data={
 preview:track.previewUrl,
@@ -210,7 +263,7 @@ cache[key]=data;
 return data;
 }
 
-// ---------------- PLAY ----------------
+// ---------- PLAY ----------
 async function playSong(el,title,artist){
 
 unlockAudio();
@@ -232,7 +285,6 @@ if(!info) return;
 
 audio.src=info.preview;
 audio.load();
-
 audio.play().catch(()=>{});
 
 document.getElementById("mini-player").classList.add("visible");
@@ -241,27 +293,27 @@ document.getElementById("mini-player-title").textContent=info.title;
 document.getElementById("mini-player-artist").textContent=info.artist;
 }
 
-// ---------------- GENERATE ----------------
+// ---------- GENERATE ----------
 function generatePlaylist(){
 
 let goal=document.getElementById("goal").value;
 let lyrics=document.getElementById("lyrics").value;
 
 let songs=songDatabase[goal].instrumental.slice();
-
-if(lyrics==="yes"){
-songs=songs.concat(songDatabase[goal].lyrics);
-}
+if(lyrics==="yes") songs=songs.concat(songDatabase[goal].lyrics);
 
 songs=songs.sort(()=>Math.random()-0.5).slice(0,6);
 
-let html="<h3>Your Playlist</h3>";
+let html="";
 
 songs.forEach(s=>{
 html+=`
 <div class="song-item" onclick="playSong(this,'${s.title}','${s.artist}')">
-<div>🎵</div>
-<div>${s.title}<br><small>${s.artist}</small></div>
+<div class="song-artwork-placeholder">🎵</div>
+<div class="song-info">
+<div class="song-title">${s.title}</div>
+<div class="song-artist">${s.artist}</div>
+</div>
 <div class="song-play-icon">▶</div>
 </div>`;
 });
@@ -269,14 +321,15 @@ html+=`
 document.getElementById("result-box").innerHTML=html;
 }
 
-// ---------------- EVENTS ----------------
-document.getElementById("generateBtn").addEventListener("click",generatePlaylist);
-
 function closePlayer(){
 audio.pause();
 document.getElementById("mini-player").classList.remove("visible");
 currentEl=null;
 }
+
+window.generatePlaylist=generatePlaylist;
+window.playSong=playSong;
+
 </script>
 
 </body>
