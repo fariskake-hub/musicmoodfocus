@@ -13,7 +13,7 @@
         section h2 { font-size:clamp(1.2rem,4vw,2.2rem); margin-bottom:clamp(12px,2vw,2rem); color:#a78bfa; font-weight:700; }
         form { background:rgba(30,41,59,0.95); padding:clamp(1rem,3vw,2rem); border-radius:16px; box-shadow:0 8px 20px rgba(0,0,0,0.2); }
         label { display:block; margin-bottom:0.4rem; color:#cbd5e1; font-weight:600; font-size:clamp(0.9rem,2.5vw,1.05rem); }
-        select { width:100%; padding:clamp(0.7rem,2vw,0.8rem); margin-bottom:clamp(10px,2vw,1.5rem); background:rgba(15,23,42,0.95); color:#e5e7eb; border:2px solid #334155; border-radius:8px; cursor:pointer; transition:all 0.3s; font-family:inherit; -webkit-appearance:none; }
+        select { width:100%; padding:clamp(0.7rem,2vw,0.8rem); margin-bottom:clamp(10px,2vw,1.5rem); background:rgba(15,23,42,0.95); color:#e5e7eb; border:2px solid #334155; border-radius:8px; cursor:pointer; transition:all 0.3s; font-family:inherit; -webkit-appearance:none; font-size:16px; }
         select:focus { outline:none; border-color:#6366f1; box-shadow:0 0 0 3px rgba(99,102,241,0.15); }
         .gen-btn { display:block; width:100%; margin:clamp(12px,2vw,2rem) 0 0; padding:clamp(0.9rem,2vw,1rem); font-size:clamp(0.95rem,3vw,1.1rem); border:none; border-radius:999px; background:linear-gradient(135deg,#6366f1,#4f46e5); color:#fff; cursor:pointer; transition:all 0.3s; font-weight:600; min-height:54px; font-family:inherit; }
         .gen-btn:active { opacity:0.85; transform:scale(0.98); }
@@ -22,9 +22,10 @@
         .playlist-header { font-size:clamp(1.2rem,4vw,1.8rem); margin-bottom:0.8rem; color:#c4b5fd; font-weight:700; }
         .playlist-description { color:#cbd5e1; margin-bottom:1.2rem; padding-bottom:1.2rem; border-bottom:2px solid #334155; line-height:1.7; font-size:clamp(0.88rem,2.5vw,0.97rem); }
         .song-list { margin-top:1rem; }
-        .song-item { background:rgba(15,23,42,0.95); padding:clamp(0.9rem,2vw,1rem) clamp(0.9rem,2vw,1.2rem); margin-bottom:0.7rem; border-radius:8px; border-left:4px solid #6366f1; transition:all 0.3s; cursor:pointer; display:flex; align-items:center; gap:clamp(0.7rem,2vw,1rem); min-height:68px; }
+        .song-item { background:rgba(15,23,42,0.95); padding:clamp(0.9rem,2vw,1rem) clamp(0.9rem,2vw,1.2rem); margin-bottom:0.7rem; border-radius:8px; border-left:4px solid #6366f1; transition:all 0.3s; cursor:pointer; display:flex; align-items:center; gap:clamp(0.7rem,2vw,1rem); min-height:68px; user-select:none; -webkit-user-select:none; }
         .song-item:active { background:rgba(99,102,241,0.15); }
         .song-item.playing { border-left-color:#10b981; background:rgba(16,185,129,0.1); }
+        .song-item.loading { border-left-color:#f59e0b; }
         .song-artwork-placeholder { width:48px; height:48px; border-radius:6px; flex-shrink:0; background:rgba(99,102,241,0.2); display:flex; align-items:center; justify-content:center; font-size:1.3rem; }
         .song-artwork { width:48px; height:48px; border-radius:6px; object-fit:cover; flex-shrink:0; display:none; }
         .song-info { flex:1; min-width:0; }
@@ -38,7 +39,7 @@
         @keyframes wave { 0%,100%{transform:scaleY(1)} 50%{transform:scaleY(0.3)} }
         #mini-player { position:fixed; bottom:0; left:0; right:0; background:rgba(15,23,42,0.97); border-top:2px solid #6366f1; padding:clamp(8px,2vw,12px) clamp(12px,3vw,24px); display:none; align-items:center; gap:clamp(8px,2vw,16px); z-index:999; }
         #mini-player.visible { display:flex; }
-        #mini-player-art { width:40px; height:40px; border-radius:6px; object-fit:cover; flex-shrink:0; }
+        #mini-player-art { width:40px; height:40px; border-radius:6px; object-fit:cover; flex-shrink:0; display:none; }
         #mini-player-info { flex:1; min-width:0; }
         #mini-player-title { font-weight:700; color:#f8fafc; font-size:clamp(0.82rem,2.5vw,0.95rem); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         #mini-player-artist { color:#a78bfa; font-size:clamp(0.75rem,2vw,0.82rem); }
@@ -58,30 +59,28 @@
         .home-btn:active { opacity:0.85; }
         .center { text-align:center; }
         body.player-open { padding-bottom:80px; }
-    
-    *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-    html { scroll-behavior:smooth; } body { line-height:1.6; min-height:100vh; min-height:100dvh; }
-    img { max-width:100%; display:block; } input,select,textarea { font-size:16px !important; }
-    nav { position:relative; }
-    .nav-toggle { display:none; width:100%; background:none; border:none; color:#cbd5e1; font-size:1rem; font-weight:600; font-family:inherit; padding:0 20px; text-align:left; cursor:pointer; align-items:center; justify-content:space-between; min-height:52px; border-bottom:1px solid rgba(255,255,255,0.07); }
-    .nav-icon { font-size:1.1rem; transition:transform 0.25s; display:inline-block; }
-    .nav-icon.open { transform:rotate(180deg); }
-    nav ul { list-style:none; display:flex; justify-content:center; flex-wrap:wrap; padding:10px 8px; gap:4px; }
-    nav li { margin:3px 4px; }
-    nav a { color:#cbd5e1; text-decoration:none; font-weight:600; font-size:0.82rem; padding:8px 13px; border-radius:20px; background:rgba(255,255,255,0.05); display:block; transition:background 0.2s,color 0.2s; white-space:nowrap; }
-    nav a:hover { color:#a78bfa; background:rgba(167,139,250,0.15); }
-    @media (max-width:700px) {
-        .nav-toggle { display:flex; }
-        nav ul { display:none !important; flex-direction:column !important; padding:0 0 10px !important; gap:0 !important; flex-wrap:nowrap !important; }
-        nav ul.open { display:flex !important; }
-        nav li { margin:0 !important; width:100% !important; }
-        nav a { border-radius:0 !important; padding:14px 22px !important; background:none !important; font-size:0.95rem !important; white-space:normal !important; border-bottom:1px solid rgba(255,255,255,0.05) !important; min-height:52px; display:flex !important; align-items:center; }
-        nav a:active { background:rgba(167,139,250,0.12) !important; color:#a78bfa !important; }
-    }
-    @media (hover:none) and (pointer:coarse) {
-        .card:hover,.section:hover,article:hover,.term-card:hover,.theory-card:hover,.song-card:hover,.process-item:hover,.genre-effects:hover,.key-point:hover,.comparison-card:hover,.intro-section:hover,.brain-section:hover,.mechanisms-section:hover,.science-box:hover,form:hover,.part2:hover { transform:none !important; }
-    }
-
+        *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        html { scroll-behavior:smooth; } body { line-height:1.6; min-height:100vh; min-height:100dvh; }
+        img { max-width:100%; display:block; }
+        nav { position:relative; }
+        .nav-toggle { display:none; width:100%; background:none; border:none; color:#cbd5e1; font-size:1rem; font-weight:600; font-family:inherit; padding:0 20px; text-align:left; cursor:pointer; align-items:center; justify-content:space-between; min-height:52px; border-bottom:1px solid rgba(255,255,255,0.07); }
+        .nav-icon { font-size:1.1rem; transition:transform 0.25s; display:inline-block; }
+        .nav-icon.open { transform:rotate(180deg); }
+        nav ul { list-style:none; display:flex; justify-content:center; flex-wrap:wrap; padding:10px 8px; gap:4px; }
+        nav li { margin:3px 4px; }
+        nav a { color:#cbd5e1; text-decoration:none; font-weight:600; font-size:0.82rem; padding:8px 13px; border-radius:20px; background:rgba(255,255,255,0.05); display:block; transition:background 0.2s,color 0.2s; white-space:nowrap; }
+        nav a:hover { color:#a78bfa; background:rgba(167,139,250,0.15); }
+        @media (max-width:700px) {
+            .nav-toggle { display:flex; }
+            nav ul { display:none !important; flex-direction:column !important; padding:0 0 10px !important; gap:0 !important; flex-wrap:nowrap !important; }
+            nav ul.open { display:flex !important; }
+            nav li { margin:0 !important; width:100% !important; }
+            nav a { border-radius:0 !important; padding:14px 22px !important; background:none !important; font-size:0.95rem !important; white-space:normal !important; border-bottom:1px solid rgba(255,255,255,0.05) !important; min-height:52px; display:flex !important; align-items:center; }
+            nav a:active { background:rgba(167,139,250,0.12) !important; color:#a78bfa !important; }
+        }
+        @media (hover:none) and (pointer:coarse) {
+            .card:hover,.section:hover,article:hover,.science-box:hover,form:hover,.part2:hover { transform:none !important; }
+        }
     </style>
 </head>
 <body>
@@ -92,7 +91,7 @@
 </section>
 
 <nav>
-    <button class="nav-toggle" id="nav-toggle" onclick="toggleNav()" aria-expanded="false" aria-label="Open navigation">
+    <button class="nav-toggle" id="nav-toggle" aria-expanded="false" aria-label="Open navigation">
         Menu <span class="nav-icon" id="nav-icon">&#9662;</span>
     </button>
     <ul id="nav-menu">
@@ -130,34 +129,7 @@
             <option value="no">No lyrics (Instrumental only)</option>
             <option value="yes">Lyrics are fine</option>
         </select>
-       function generatePlaylist(){
-let goal=document.getElementById('goal').value;
-let lyr=document.getElementById('lyrics').value;
-let songs=lyr==="no"?songDatabase[goal].instrumental:songDatabase[goal].lyrics;
-
-let html="";
-songs.forEach((s,i)=>{
-html+=`
-<div class="song-item" data-title="${s.title}" data-artist="${s.artist}">
-<div class="song-artwork-placeholder">🎵</div>
-<img class="song-artwork">
-<div class="song-info">
-<div>${s.title}</div>
-<div>${s.artist}</div>
-</div>
-</div>`;
-});
-
-const box=document.getElementById('result-box');
-box.innerHTML=html;
-
-// ✅ attach click events safely (no quote bugs)
-box.querySelectorAll('.song-item').forEach(item=>{
-item.addEventListener('click',()=>{
-playSong(item,item.dataset.title,item.dataset.artist);
-});
-});
-}  
+        <button type="button" class="gen-btn" id="generateBtn">&#9654; Generate My Playlist</button>
     </form>
 </section>
 
@@ -179,237 +151,432 @@ playSong(item,item.dataset.title,item.dataset.artist);
 <div class="center"><a class="home-btn" href="index.html">&#8592; Go Home</a></div>
 
 <div id="mini-player">
-    <img id="mini-player-art" src="" alt="artwork" style="display:none">
+    <img id="mini-player-art" src="" alt="artwork">
     <div id="mini-player-info">
         <div id="mini-player-title"></div>
         <div id="mini-player-artist"></div>
     </div>
-    <audio id="mini-player-audio" controls preload="none" playsinline webkit-playsinline x-webkit-airplay="allow"></audio>
-    <button id="mini-player-close" onclick="closePlayer()" aria-label="Close player">&#10005;</button>
+    <audio id="mini-player-audio" controls preload="none" playsinline webkit-playsinline></audio>
+    <button id="mini-player-close" aria-label="Close player">&#10005;</button>
 </div>
 
 <script>
-<!-- ONLY SCRIPT SECTION CHANGED — everything else is your original -->
+/* ============================================================
+   SONG DATABASE
+   ============================================================ */
+var songDatabase = {
+    focus: {
+        instrumental: [
+            { title:"Moonlight Sonata", artist:"Beethoven", genre:"Classical" },
+            { title:"Clair de Lune", artist:"Debussy", genre:"Classical" },
+            { title:"Gymnopedie No. 1", artist:"Erik Satie", genre:"Classical" },
+            { title:"River Flows in You", artist:"Yiruma", genre:"Piano" },
+            { title:"Experience", artist:"Ludovico Einaudi", genre:"Piano" },
+            { title:"Weightless", artist:"Marconi Union", genre:"Ambient" },
+            { title:"Divenire", artist:"Ludovico Einaudi", genre:"Piano" },
+            { title:"Porcelain", artist:"Moby", genre:"Ambient" }
+        ],
+        lyrics: [
+            { title:"Lost in Yesterday", artist:"Tame Impala", genre:"Indie" },
+            { title:"Float On", artist:"Modest Mouse", genre:"Indie" },
+            { title:"Holocene", artist:"Bon Iver", genre:"Indie Folk" },
+            { title:"Electric Relaxation", artist:"A Tribe Called Quest", genre:"Hip-Hop" }
+        ]
+    },
+    relax: {
+        instrumental: [
+            { title:"Weightless", artist:"Marconi Union", genre:"Ambient" },
+            { title:"Clair de Lune", artist:"Debussy", genre:"Classical" },
+            { title:"River Flows in You", artist:"Yiruma", genre:"Piano" },
+            { title:"Gymnopedie No. 1", artist:"Erik Satie", genre:"Classical" },
+            { title:"Divenire", artist:"Ludovico Einaudi", genre:"Piano" },
+            { title:"Porcelain", artist:"Moby", genre:"Ambient" }
+        ],
+        lyrics: [
+            { title:"Banana Pancakes", artist:"Jack Johnson", genre:"Folk" },
+            { title:"Come Away With Me", artist:"Norah Jones", genre:"Jazz" },
+            { title:"Holocene", artist:"Bon Iver", genre:"Indie Folk" },
+            { title:"The Night We Met", artist:"Lord Huron", genre:"Indie Folk" },
+            { title:"To Build a Home", artist:"The Cinematic Orchestra", genre:"Ambient" }
+        ]
+    },
+    happy: {
+        instrumental: [
+            { title:"Take Five", artist:"Dave Brubeck", genre:"Jazz" },
+            { title:"Sing Sing Sing", artist:"Benny Goodman", genre:"Jazz" },
+            { title:"Jessica", artist:"The Allman Brothers Band", genre:"Rock" }
+        ],
+        lyrics: [
+            { title:"Good Life", artist:"OneRepublic", genre:"Pop" },
+            { title:"Walking on Sunshine", artist:"Katrina and The Waves", genre:"Pop" },
+            { title:"Happy", artist:"Pharrell Williams", genre:"Pop" },
+            { title:"Mr. Blue Sky", artist:"Electric Light Orchestra", genre:"Rock" },
+            { title:"September", artist:"Earth Wind and Fire", genre:"Funk" },
+            { title:"Don't Stop Me Now", artist:"Queen", genre:"Rock" },
+            { title:"Uptown Funk", artist:"Bruno Mars", genre:"Funk" }
+        ]
+    },
+    energy: {
+        instrumental: [
+            { title:"Sandstorm", artist:"Darude", genre:"EDM" },
+            { title:"Animals", artist:"Martin Garrix", genre:"EDM" },
+            { title:"Orion", artist:"Metallica", genre:"Rock" }
+        ],
+        lyrics: [
+            { title:"Till I Collapse", artist:"Eminem", genre:"Hip-Hop" },
+            { title:"Eye of the Tiger", artist:"Survivor", genre:"Rock" },
+            { title:"Thunderstruck", artist:"AC/DC", genre:"Rock" },
+            { title:"Lose Yourself", artist:"Eminem", genre:"Hip-Hop" },
+            { title:"Levels", artist:"Avicii", genre:"EDM" },
+            { title:"Can't Hold Us", artist:"Macklemore", genre:"Hip-Hop" },
+            { title:"Titanium", artist:"David Guetta", genre:"EDM" }
+        ]
+    }
+};
 
-<script>
-const previewCache = {};
-var audioUnlocked = false;
+var moodData = {
+    focus:  { emoji:"&#127911;", title:"Focus Playlist",       desc:"This playlist avoids lyrics to reduce language interference and promote a flow state. Instrumental music blocks distractions without adding cognitive load." },
+    relax:  { emoji:"&#127754;", title:"Relaxation Playlist",  desc:"These tracks lower heart rate and cortisol levels. Classical and acoustic elements promote calmness and reduce stress and anxiety." },
+    happy:  { emoji:"&#9728;",   title:"Mood-Boost Playlist",  desc:"Upbeat tempos stimulate dopamine release. Jazz and funk trigger alpha waves associated with a calm, happy mind." },
+    energy: { emoji:"&#9889;",   title:"Energy Playlist",      desc:"Fast tempo music increases arousal and motivation. High-energy tracks boost physical performance and mental drive." }
+};
 
-var audioEl = document.getElementById('mini-player-audio');
-var miniPlayer = document.getElementById('mini-player');
-var currentEl = null;
+var scienceText = {
+    studying:   "Instrumental music is optimal for studying as it avoids verbal processing interference, allowing your brain to focus on reading and comprehension tasks.",
+    working:    "Background music creates an optimal environment for productivity by blocking distractions and promoting consistent brainwaves that improve performance.",
+    exercising: "Music with strong rhythms synchronises with physical movement, increasing motivation and endurance. Higher volume is acceptable during physical activity.",
+    relaxing:   "Low volume calming music promotes peace of mind by triggering alpha waves, lowering cortisol, and releasing dopamine for stress relief."
+};
 
-// Unlock audio for iOS
-function unlockAudio() {
-    if (audioUnlocked) return;
-    audioUnlocked = true;
+/* ============================================================
+   AUDIO STATE
+   ============================================================ */
+var previewCache  = {};   // key -> info object | null
+var prefetchQueue = {};   // key -> Promise (deduplicates in-flight requests)
+var currentItem   = null; // currently active .song-item element
+var audioEl       = document.getElementById('mini-player-audio');
+var miniPlayer    = document.getElementById('mini-player');
 
-    audioEl.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
-    var p = audioEl.play();
-    if (p && p.catch) p.catch(function(){});
-    audioEl.pause();
-    audioEl.src = '';
+/* ============================================================
+   ITUNES API  — JSONP first (works on iOS Safari, no CORS)
+                 fetch() fallback for desktop / Android
+   ============================================================ */
+function forceHttps(url) {
+    /* iTunes sometimes returns http:// preview URLs.
+       iOS Safari blocks mixed-content, so we force https://  */
+    return url ? url.replace(/^http:\/\//i, 'https://') : null;
 }
-document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
-document.addEventListener('click', unlockAudio, { once: true });
 
-// JSONP (iOS-safe)
-function fetchItunesJSONP(title, artist) {
+function itunesJSONP(title, artist) {
     return new Promise(function(resolve) {
-        var cbName = 'itcb_' + Date.now() + '_' + Math.floor(Math.random()*9999);
-        var script = document.createElement('script');
-        var timer;
-
-        window[cbName] = function(data) {
-            cleanup();
-            resolve(data.results || []);
-        };
+        /* Register the callback BEFORE appending the script tag so Safari
+           doesn't fire the callback before window[cb] exists */
+        var cb = 'itcb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+        var script, timer;
 
         function cleanup() {
             clearTimeout(timer);
-            delete window[cbName];
-            if (script.parentNode) script.remove();
+            try { delete window[cb]; } catch(e) {}
+            if (script && script.parentNode) script.parentNode.removeChild(script);
         }
 
-        timer = setTimeout(function(){
+        window[cb] = function(data) {
             cleanup();
-            resolve([]);
-        }, 7000);
-
-        var q = encodeURIComponent(title + ' ' + artist);
-        script.src = 'https://itunes.apple.com/search?term=' + q +
-                     '&entity=song&limit=5&media=music&country=US&callback=' + cbName;
-
-        script.onerror = function() {
-            cleanup();
-            resolve([]);
+            resolve((data && data.results) || []);
         };
 
-        document.body.appendChild(script);
+        timer = setTimeout(function() { cleanup(); resolve([]); }, 7000);
+
+        script = document.createElement('script');
+        script.onerror = function() { cleanup(); resolve([]); };
+        script.src = 'https://itunes.apple.com/search?term=' +
+            encodeURIComponent(title + ' ' + artist) +
+            '&entity=song&limit=5&media=music&country=US&callback=' + cb;
+        document.head.appendChild(script);
     });
 }
 
-// ✅ FIXED VERSION (better matching + artwork + fallback)
-async function fetchPreview(title, artist) {
-    var key = title + '__' + artist;
-    if (previewCache[key] !== undefined) return previewCache[key];
+function fetchTrackInfo(title, artist) {
+    var key = title + '\x00' + artist;
+    if (previewCache.hasOwnProperty(key))  return Promise.resolve(previewCache[key]);
+    if (prefetchQueue.hasOwnProperty(key)) return prefetchQueue[key];
 
-    let results = [];
+    prefetchQueue[key] = itunesJSONP(title, artist)
+        .then(function(results) {
+            if (results.length) return results;
+            /* fetch() fallback — works on desktop & Android Chrome */
+            return fetch('https://itunes.apple.com/search?term=' +
+                encodeURIComponent(title + ' ' + artist) +
+                '&entity=song&limit=5&media=music&country=US')
+                .then(function(r) { return r.ok ? r.json() : { results:[] }; })
+                .then(function(d) { return d.results || []; })
+                .catch(function()  { return []; });
+        })
+        .then(function(results) {
+            /* Prefer a result whose title roughly matches what we searched */
+            var track = results.find(function(r) {
+                return r.previewUrl &&
+                       r.trackName &&
+                       r.trackName.toLowerCase().indexOf(title.toLowerCase().split(' ')[0]) !== -1;
+            });
+            if (!track) track = results.find(function(r) { return r.previewUrl; }) || null;
 
-    try {
-        results = await fetchItunesJSONP(title, artist);
-    } catch(e) {}
-
-    if (!results.length) {
-        try {
-            var q = encodeURIComponent(title + ' ' + artist);
-            var res = await fetch(
-                'https://itunes.apple.com/search?term=' + q +
-                '&entity=song&limit=5&media=music&country=US'
-            );
-            if (res.ok) {
-                var d = await res.json();
-                results = d.results || [];
+            var info = null;
+            if (track) {
+                var raw = track.artworkUrl100 || track.artworkUrl60 || '';
+                info = {
+                    preview:    forceHttps(track.previewUrl),
+                    artwork:    forceHttps(raw.replace(/\d+x\d+bb/, '300x300bb') || null),
+                    trackName:  track.trackName,
+                    artistName: track.artistName
+                };
             }
-        } catch(e) {}
-    }
+            previewCache[key] = info;
+            delete prefetchQueue[key];
+            return info;
+        })
+        .catch(function() {
+            previewCache[key] = null;
+            delete prefetchQueue[key];
+            return null;
+        });
 
-    let track = results.find(r =>
-        r.previewUrl &&
-        r.trackName &&
-        r.artistName &&
-        r.trackName.toLowerCase().includes(title.toLowerCase().split(' ')[0])
-    );
-
-    if (!track) {
-        track = results.find(r => r.previewUrl) || null;
-    }
-
-    let info = null;
-
-    if (track) {
-        info = {
-            preview: track.previewUrl,
-            artwork: track.artworkUrl100
-                ? track.artworkUrl100.replace(/100x100bb|100x100/, '400x400')
-                : track.artworkUrl60
-                    ? track.artworkUrl60.replace(/60x60bb|60x60/, '400x400')
-                    : null,
-            trackName: track.trackName,
-            artistName: track.artistName
-        };
-    }
-
-    previewCache[key] = info;
-    return info;
+    return prefetchQueue[key];
 }
 
-audioEl.addEventListener('ended', function() {
-    if (currentEl) { setStop(currentEl); currentEl = null; }
-    miniPlayer.classList.remove('visible');
-    document.body.classList.remove('player-open');
-});
+/* ============================================================
+   PRE-FETCH ON TOUCHSTART / MOUSEENTER
+   ----------------------------------------------------------
+   iOS Safari only allows audio.play() synchronously within a
+   user-gesture handler. Any await before play() breaks this.
 
-function setPlay(el) {
-    el.classList.add('playing');
-    el.classList.remove('loading');
-    el.querySelector('.song-play-icon').innerHTML =
-        '<div class="waveform"><span></span><span></span><span></span><span></span><span></span></div>';
+   The fix: start the iTunes network request the moment the
+   user first touches a song row (touchstart). By the time they
+   lift their finger and the click fires, fetchTrackInfo() has
+   already resolved and previewCache is populated. playSong()
+   can then set audioEl.src SYNCHRONOUSLY — keeping the audio
+   session alive — and defer play() to the oncanplay event,
+   which iOS always permits.
+   ============================================================ */
+function attachPrefetch(item) {
+    function prefetch() { fetchTrackInfo(item.dataset.title, item.dataset.artist); }
+    item.addEventListener('touchstart', prefetch, { passive: true });
+    item.addEventListener('mouseenter', prefetch);
 }
 
-function setStop(el) {
-    if (!el) return;
-    el.classList.remove('playing','loading');
-    el.querySelector('.song-play-icon').textContent = '▶';
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
+function setPlayingUI(item, on) {
+    if (!item || !document.body.contains(item)) return;
+    var icon = item.querySelector('.song-play-icon');
+    if (on) {
+        item.classList.add('playing');
+        item.classList.remove('loading');
+        if (icon) icon.innerHTML = '<div class="waveform"><span></span><span></span><span></span><span></span><span></span></div>';
+    } else {
+        item.classList.remove('playing', 'loading');
+        if (icon) icon.textContent = '\u25B6';
+    }
 }
 
-async function playSong(el, title, artist) {
-    unlockAudio();
-
-    if (currentEl === el) {
-        audioEl.pause();
-        setStop(el);
-        currentEl = null;
-        miniPlayer.classList.remove('visible');
-        return;
-    }
-
-    if (currentEl) {
-        audioEl.pause();
-        setStop(currentEl);
-    }
-
-    el.classList.add('loading');
-    el.querySelector('.song-play-icon').textContent = '…';
-    currentEl = el;
-
-    const info = await fetchPreview(title, artist);
-    if (currentEl !== el) return;
-
-    const hint = el.querySelector('.song-preview-hint');
-
-    if (!info || !info.preview) {
-        setStop(el);
-        if (hint) hint.textContent = 'No preview available';
-        currentEl = null;
-        return;
-    }
-
-    // ✅ FIXED artwork loading (no flicker)
-    const artImg = el.querySelector('.song-artwork');
-    const ph = el.querySelector('.song-artwork-placeholder');
-
-    if (artImg && info.artwork) {
-        const img = new Image();
-        img.onload = function() {
-            artImg.src = info.artwork;
-            artImg.style.display = 'block';
-            if (ph) ph.style.display = 'none';
-        };
-        img.src = info.artwork;
-    }
-
-    // mini player
-    const artEl = document.getElementById('mini-player-art');
-    if (info.artwork) {
-        artEl.src = info.artwork;
-        artEl.style.display = 'block';
-    }
-
-    document.getElementById('mini-player-title').textContent = info.trackName;
-    document.getElementById('mini-player-artist').textContent = info.artistName;
-
-    // ✅ iOS playback fix
-    audioEl.src = info.preview;
-    audioEl.load();
-
-    try {
-        await audioEl.play();
-    } catch(err) {
-        console.warn('Playback blocked:', err);
-    }
-
-    setPlay(el);
-    miniPlayer.classList.add('visible');
-    document.body.classList.add('player-open');
-
-    if (hint) hint.textContent = 'Playing preview…';
+function setHint(item, text) {
+    var h = item && item.querySelector('.song-preview-hint');
+    if (h) h.textContent = text;
 }
 
-function closePlayer() {
+function stopCurrent() {
     audioEl.pause();
-    if (currentEl) { setStop(currentEl); currentEl = null; }
+    if (currentItem) { setPlayingUI(currentItem, false); currentItem = null; }
     miniPlayer.classList.remove('visible');
     document.body.classList.remove('player-open');
 }
-</script>
-</script>
-<script>
-(function(){
-    function toggleNav(){var m=document.getElementById('nav-menu'),i=document.getElementById('nav-icon'),b=document.getElementById('nav-toggle');if(!m)return;var open=m.classList.toggle('open');if(i)i.classList.toggle('open',open);if(b)b.setAttribute('aria-expanded',String(open));}
-    window.toggleNav=toggleNav;
-    document.addEventListener('DOMContentLoaded',function(){var menu=document.getElementById('nav-menu');if(!menu)return;menu.querySelectorAll('a').forEach(function(a){a.addEventListener('click',function(){menu.classList.remove('open');var i=document.getElementById('nav-icon');if(i)i.classList.remove('open');});});});
-})();
+
+audioEl.addEventListener('ended', stopCurrent);
+
+/* ============================================================
+   playSong  — the mobile-safe tap handler
+   ============================================================ */
+function playSong(item, title, artist) {
+    var key = title + '\x00' + artist;
+
+    /* Toggle off if already playing */
+    if (currentItem === item) { stopCurrent(); return; }
+
+    stopCurrent();
+
+    /* Show loading state */
+    item.classList.add('loading');
+    var icon = item.querySelector('.song-play-icon');
+    if (icon) icon.textContent = '\u2026';
+    currentItem = item;
+
+    function doPlay(info) {
+        if (currentItem !== item) return; /* user tapped elsewhere */
+
+        if (!info || !info.preview) {
+            item.classList.remove('loading');
+            setPlayingUI(item, false);
+            setHint(item, 'Preview not available');
+            currentItem = null;
+            return;
+        }
+
+        /* ── iOS AUDIO FIX ──────────────────────────────────────────────
+           Setting src + load() here keeps the gesture session open.
+           We then play inside oncanplay — iOS allows media-element
+           events to trigger play() even after the gesture stack unwinds.
+           ────────────────────────────────────────────────────────────── */
+        audioEl.src = info.preview;
+        audioEl.load();
+
+        function onCanPlay() {
+            audioEl.removeEventListener('canplay', onCanPlay);
+            if (currentItem !== item) return;
+            var p = audioEl.play();
+            if (p && p.catch) {
+                p.catch(function(err) {
+                    /* Still blocked (e.g. iOS low-power mode)?
+                       The native controls in the mini-player let the user tap play. */
+                    console.warn('play() blocked:', err.message);
+                    setHint(item, 'Tap play in the bar below');
+                });
+            }
+        }
+        audioEl.addEventListener('canplay', onCanPlay);
+
+        /* Artwork in the song row */
+        if (info.artwork) {
+            var artImg = item.querySelector('.song-artwork');
+            var ph     = item.querySelector('.song-artwork-placeholder');
+            if (artImg) {
+                artImg.src = info.artwork;
+                artImg.style.display = 'block';
+                if (ph) ph.style.display = 'none';
+            }
+        }
+
+        /* Mini-player */
+        var mpArt = document.getElementById('mini-player-art');
+        if (info.artwork) { mpArt.src = info.artwork; mpArt.style.display = 'block'; }
+        else              { mpArt.src = '';           mpArt.style.display = 'none';  }
+        document.getElementById('mini-player-title').textContent  = info.trackName  || title;
+        document.getElementById('mini-player-artist').textContent = info.artistName || artist;
+        miniPlayer.classList.add('visible');
+        document.body.classList.add('player-open');
+
+        setPlayingUI(item, true);
+        setHint(item, 'Playing preview\u2026');
+    }
+
+    /* If touchstart pre-fetch already resolved, doPlay runs synchronously
+       (still inside the gesture stack) — the safest path on iOS.
+       Otherwise we fall back to an async fetch; play() may need the
+       native controls as a backup on strict iOS environments.          */
+    if (previewCache.hasOwnProperty(key)) {
+        doPlay(previewCache[key]);
+    } else {
+        fetchTrackInfo(title, artist).then(doPlay);
+    }
+}
+
+/* ============================================================
+   CLOSE PLAYER
+   ============================================================ */
+function closePlayer() { stopCurrent(); }
+
+/* ============================================================
+   GENERATE PLAYLIST
+   ============================================================ */
+function generatePlaylist() {
+    var goal = document.getElementById('goal').value;
+    var task = document.getElementById('task').value;
+    var lyr  = document.getElementById('lyrics').value;
+    var rb   = document.getElementById('result-box');
+
+    closePlayer();
+    rb.classList.remove('empty');
+
+    var pool = lyr === 'no'
+        ? songDatabase[goal].instrumental
+        : songDatabase[goal].instrumental.slice(0, 3).concat(songDatabase[goal].lyrics.slice(0, 5));
+
+    /* Shuffle and pick 6 */
+    var shuffled = pool.slice().sort(function() { return 0.5 - Math.random(); }).slice(0, 6);
+    var md = moodData[goal];
+
+    var html = '<div class="playlist-header">' + md.emoji + ' ' + md.title + '</div>';
+    html += '<div class="playlist-description">' + md.desc + '</div>';
+    html += '<p style="color:#6366f1;font-size:clamp(0.82rem,2.5vw,0.9rem);margin-bottom:0.8rem;">&#127925; Tap any song to hear a 30-second preview</p>';
+    html += '<div class="song-list">';
+
+    shuffled.forEach(function(song, i) {
+        /* Encode into data attributes — safe against apostrophes and quotes */
+        var safeTitle  = song.title.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        var safeArtist = song.artist.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+        html += '<div class="song-item" data-title="' + safeTitle + '" data-artist="' + safeArtist + '">';
+        html += '  <div class="song-artwork-placeholder">&#127925;</div>';
+        html += '  <img class="song-artwork" src="" alt="">';
+        html += '  <div class="song-info">';
+        html += '    <div class="song-title">' + (i + 1) + '. ' + song.title + '</div>';
+        html += '    <div class="song-artist">' + song.artist + ' &middot; ' + song.genre + '</div>';
+        html += '    <div class="song-preview-hint">Tap to preview</div>';
+        html += '  </div>';
+        html += '  <div class="song-play-icon">&#9654;</div>';
+        html += '</div>';
+    });
+
+    html += '</div>';
+    html += '<div class="science-box"><h3>&#129504; Why this works for '
+         + task.charAt(0).toUpperCase() + task.slice(1)
+         + '</h3><p>' + scienceText[task] + '</p></div>';
+
+    rb.innerHTML = html;
+
+    /* Attach listeners — no inline onclick, no quote bugs */
+    rb.querySelectorAll('.song-item').forEach(function(item) {
+        attachPrefetch(item);
+        item.addEventListener('click', function() {
+            playSong(item, item.dataset.title, item.dataset.artist);
+        });
+    });
+
+    rb.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+/* ============================================================
+   BUTTON + NAV WIRING  (runs after DOM is ready)
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+
+    /* Generate button */
+    document.getElementById('generateBtn').addEventListener('click', generatePlaylist);
+
+    /* Mini-player close button */
+    document.getElementById('mini-player-close').addEventListener('click', closePlayer);
+
+    /* Mobile nav toggle */
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+        var menu = document.getElementById('nav-menu');
+        var icon = document.getElementById('nav-icon');
+        var btn  = document.getElementById('nav-toggle');
+        var open = menu.classList.toggle('open');
+        if (icon) icon.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', String(open));
+    });
+
+    /* Close nav when a link is tapped */
+    var navMenu = document.getElementById('nav-menu');
+    if (navMenu) {
+        navMenu.querySelectorAll('a').forEach(function(a) {
+            a.addEventListener('click', function() {
+                navMenu.classList.remove('open');
+                var icon = document.getElementById('nav-icon');
+                if (icon) icon.classList.remove('open');
+            });
+        });
+    }
+});
 </script>
 </body>
 </html>
