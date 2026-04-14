@@ -130,7 +130,34 @@
             <option value="no">No lyrics (Instrumental only)</option>
             <option value="yes">Lyrics are fine</option>
         </select>
-        <button type="button" class="gen-btn" onclick="generatePlaylist()">&#9654; Generate My Playlist</button>
+       function generatePlaylist(){
+let goal=document.getElementById('goal').value;
+let lyr=document.getElementById('lyrics').value;
+let songs=lyr==="no"?songDatabase[goal].instrumental:songDatabase[goal].lyrics;
+
+let html="";
+songs.forEach((s,i)=>{
+html+=`
+<div class="song-item" data-title="${s.title}" data-artist="${s.artist}">
+<div class="song-artwork-placeholder">🎵</div>
+<img class="song-artwork">
+<div class="song-info">
+<div>${s.title}</div>
+<div>${s.artist}</div>
+</div>
+</div>`;
+});
+
+const box=document.getElementById('result-box');
+box.innerHTML=html;
+
+// ✅ attach click events safely (no quote bugs)
+box.querySelectorAll('.song-item').forEach(item=>{
+item.addEventListener('click',()=>{
+playSong(item,item.dataset.title,item.dataset.artist);
+});
+});
+}  
     </form>
 </section>
 
