@@ -157,7 +157,7 @@
         <div id="mini-player-title"></div>
         <div id="mini-player-artist"></div>
     </div>
-    <audio id="mini-player-audio" controls preload="metadata" playsinline webkit-playsinline crossorigin="anonymous"></audio>
+    <audio id="mini-player-audio" controls preload="none" playsinline webkit-playsinline x-webkit-airplay="allow"></audio>
     <button id="mini-player-close" onclick="closePlayer()" aria-label="Close player">&#10005;</button>
 </div>
 
@@ -181,82 +181,92 @@ const songDatabase={
     }
 };
 
-const previewCache={};
+const previewCache = {};
+var audioUnlocked = false;
 
-// FIX: Use JSONP-style fetch via a Promise wrapper so it works on all browsers
-// including iOS WebViews which can block cross-origin fetch in some contexts.
-async function fetchJSONP(url) {
-    return new Promise(function(resolve, reject) {
-        var callbackName = 'itunesCallback_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
-        window[callbackName] = function(data) {
-            cleanup();
-            resolve(data);
-        };
+var audioEl = document.getElementById('mini-player-audio');
+var miniPlayer = document.getElementById('mini-player');
+var currentEl = null;
+
+// iOS Safari requires the audio element to be "unlocked" by a direct user gesture.
+// We do a silent load+pause the very first time the user taps anywhere on the page,
+// which opens the audio session before any async work happens.
+function unlockAudio() {
+    if (audioUnlocked) return;
+    audioUnlocked = true;
+    audioEl.src = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=';
+    var p = audioEl.play();
+    if (p && p.catch) p.catch(function(){});
+    audioEl.pause();
+    audioEl.src = '';
+}
+document.addEventListener('touchstart', unlockAudio, { once: true, passive: true });
+document.addEventListener('click', unlockAudio, { once: true });
+
+// iTunes Search API via JSONP — the only method that works reliably on iOS Safari
+// because iOS WebViews block cross-origin fetch to apple.com from non-apple origins.
+function fetchItunesJSONP(title, artist) {
+    return new Promise(function(resolve) {
+        var cbName = 'itcb_' + Date.now() + '_' + Math.floor(Math.random() * 99999);
+        var timer;
         function cleanup() {
-            delete window[callbackName];
-            if (script.parentNode) script.parentNode.removeChild(script);
+            clearTimeout(timer);
+            try { delete window[cbName]; } catch(e) {}
+            if (script && script.parentNode) script.parentNode.removeChild(script);
         }
-        var script = document.createElement('script');
-        script.src = url + (url.indexOf('?') === -1 ? '?' : '&') + 'callback=' + callbackName;
-        script.onerror = function() {
+        window[cbName] = function(data) {
             cleanup();
-            reject(new Error('JSONP request failed'));
+            resolve(data && data.results ? data.results : []);
         };
-        document.body.appendChild(script);
+        timer = setTimeout(function() {
+            cleanup();
+            resolve([]);
+        }, 8000);
+        var q = encodeURIComponent(title + ' ' + artist);
+        var script = document.createElement('script');
+        script.src = 'https://itunes.apple.com/search?term=' + q +
+                     '&entity=song&limit=5&media=music&country=GB&callback=' + cbName;
+        script.onerror = function() { cleanup(); resolve([]); };
+        document.head.appendChild(script);
     });
 }
 
 async function fetchPreview(title, artist) {
-    const key = title + '__' + artist;
+    var key = title + '__' + artist;
     if (previewCache[key] !== undefined) return previewCache[key];
-    const q = encodeURIComponent(title + ' ' + artist);
-    const url = 'https://itunes.apple.com/search?term=' + q + '&entity=song&limit=3&media=music&country=US';
-    try {
-        const res = await fetch(url, { mode: 'cors' });
-        if (res.ok) {
-            const data = await res.json();
-            if (data.results && data.results.length > 0) {
-                const track = data.results.find(function(r) { return r.previewUrl; }) || null;
-                if (track) {
-                    const info = {
-                        preview: track.previewUrl,
-                        artwork: track.artworkUrl60 ? track.artworkUrl60.replace('60x60','100x100') : null,
-                        trackName: track.trackName,
-                        artistName: track.artistName
-                    };
-                    previewCache[key] = info;
-                    return info;
-                }
-            }
-        }
-    } catch (e) {
-        // fallback to JSONP if direct CORS fetch fails on mobile browsers or WebViews
-    }
-    try {
-        const data = await fetchJSONP(url);
-        if (data && data.results && data.results.length > 0) {
-            const track = data.results.find(function(r) { return r.previewUrl; }) || null;
-            if (track) {
-                const info = {
-                    preview: track.previewUrl,
-                    artwork: track.artworkUrl60 ? track.artworkUrl60.replace('60x60','100x100') : null,
-                    trackName: track.trackName,
-                    artistName: track.artistName
-                };
-                previewCache[key] = info;
-                return info;
-            }
-        }
-    } catch (e) {
-        // if JSONP also fails, return null below
-    }
-    previewCache[key] = null;
-    return null;
-}
 
-var currentEl = null;
-var audioEl = document.getElementById('mini-player-audio');
-var miniPlayer = document.getElementById('mini-player');
+    var results = [];
+
+    // Try JSONP first (works on iOS Safari, no CORS issue)
+    try { results = await fetchItunesJSONP(title, artist); } catch(e) {}
+
+    // If JSONP got nothing, try fetch as a fallback (works on desktop/Android)
+    if (!results.length) {
+        try {
+            var q = encodeURIComponent(title + ' ' + artist);
+            var res = await fetch('https://itunes.apple.com/search?term=' + q + '&entity=song&limit=5&media=music&country=GB');
+            if (res.ok) { var d = await res.json(); results = d.results || []; }
+        } catch(e) {}
+    }
+
+    var track = results.find(function(r) { return r.previewUrl; }) || null;
+    var info = null;
+    if (track) {
+        info = {
+            preview: track.previewUrl,
+            // Request a larger artwork — replace the size token with 300x300
+            artwork: track.artworkUrl100
+                ? track.artworkUrl100.replace('100x100bb', '300x300bb')
+                : (track.artworkUrl60
+                    ? track.artworkUrl60.replace('60x60bb', '300x300bb')
+                    : null),
+            trackName: track.trackName,
+            artistName: track.artistName
+        };
+    }
+    previewCache[key] = info;
+    return info;
+}
 
 audioEl.addEventListener('ended', function() {
     if (currentEl) { setStop(currentEl); currentEl = null; }
@@ -272,14 +282,16 @@ function setPlay(el) {
 }
 
 function setStop(el) {
-    // FIX: Guard against detached DOM nodes (old elements from a regenerated playlist)
     if (!el || !document.body.contains(el)) return;
-    el.classList.remove('playing','loading');
+    el.classList.remove('playing', 'loading');
     var ic = el.querySelector('.song-play-icon');
     if (ic) ic.textContent = '\u25B6';
 }
 
 async function playSong(el, title, artist) {
+    // Ensure audio is unlocked on this gesture before going async
+    unlockAudio();
+
     if (currentEl === el) {
         audioEl.pause();
         setStop(el);
@@ -289,34 +301,66 @@ async function playSong(el, title, artist) {
         return;
     }
     if (currentEl) { audioEl.pause(); setStop(currentEl); }
+
     el.classList.add('loading');
     var ic = el.querySelector('.song-play-icon');
-    if (ic) ic.textContent = '...';
+    if (ic) ic.textContent = '…';
     currentEl = el;
-    const info = await fetchPreview(title, artist);
-    // FIX: After async, confirm this element is still the active one
-    if (currentEl !== el) return;
+
+    // Pre-set the audio src to something benign so iOS audio session stays open
+    // while we do the async network call
+    audioEl.src = '';
+
+    var info = await fetchPreview(title, artist);
+    if (currentEl !== el) return; // user tapped something else while loading
+
+    var hint = el.querySelector('.song-preview-hint');
+
     if (!info || !info.preview) {
         setStop(el);
-        el.classList.add('no-preview');
-        var hint = el.querySelector('.song-preview-hint');
         if (hint) hint.textContent = 'No preview available';
         currentEl = null;
         return;
     }
+
+    // Show artwork inside the song row
+    var artImg = el.querySelector('.song-artwork');
+    var ph = el.querySelector('.song-artwork-placeholder');
+    if (artImg && info.artwork) {
+        artImg.onload = null;
+        artImg.src = info.artwork;
+        artImg.style.display = 'block';
+        if (ph) ph.style.display = 'none';
+    }
+
+    // Show artwork in mini-player
     var artEl = document.getElementById('mini-player-art');
-    if (info.artwork) { artEl.src = info.artwork; artEl.style.display = 'block'; }
-    else { artEl.style.display = 'none'; }
+    if (info.artwork) {
+        artEl.src = info.artwork;
+        artEl.style.display = 'block';
+    } else {
+        artEl.src = '';
+        artEl.style.display = 'none';
+    }
+
     document.getElementById('mini-player-title').textContent = info.trackName || title;
     document.getElementById('mini-player-artist').textContent = info.artistName || artist;
+
+    // Set src then play — iOS needs these to happen quickly after the gesture
     audioEl.src = info.preview;
-    audioEl.play().catch(function() {});
+    audioEl.load();
+    var playPromise = audioEl.play();
+    if (playPromise && playPromise.catch) {
+        playPromise.catch(function(err) {
+            // If autoplay is blocked, the mini-player controls still let the user tap play
+            console.warn('Autoplay blocked:', err);
+        });
+    }
+
     setPlay(el);
     miniPlayer.classList.add('visible');
     document.body.classList.add('player-open');
-    var artImg = el.querySelector('.song-artwork');
-    var ph = el.querySelector('.song-artwork-placeholder');
-    if (artImg && info.artwork) { artImg.src = info.artwork; artImg.style.display = 'block'; if (ph) ph.style.display = 'none'; }
+    if (hint) hint.textContent = 'Playing preview…';
 }
 
 function closePlayer() {
